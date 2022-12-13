@@ -21,33 +21,21 @@ public:
 	void MoveCamera(float dx, float dy);
 	void Zoom(float dd);
 
-	void UpdatePhysics(float dt);
-
-	// -- ACTIONS FROM UI
-	void DisplayCubeChanged(bool display);
-	void DisplayDiagonalChanged(bool display);
-	void DisplayTraceChanged(bool display, uint32_t traceLength);
-	void ToggleGravity(bool gravityOn);
-
-	void RestartSimulation(float edge, float density, float deviation, float angularVelocity, float integrationStep, bool gravityOn);
-	void PauseSimulation();
-	void ResumeSimulation();
+	void UpdatePhysics();
 
 protected:
 
-	float m_time_left_to_render;
-	float m_integrationStep;
-	bool m_simulationStarted = false;
-	bool m_simulationPaused = false;
+	void InitializeControlPoints();
+
+	float m_simulationTimeStep;
 
 	float m_lastFrameTime;
+	float m_fullSimulationTime;
+	float m_residualSimulationTime;
 
 	Scene m_scene;
-	ParticleSystem m_particleSystem;
 	std::shared_ptr<D11Renderer> m_renderer;
 
-	SceneObject m_cube;
-	SceneObject m_traceParticles;
 	SceneObject m_grid;
-	SceneObject m_diagonal;
+	std::vector<SceneObject> m_controlPoints;
 };

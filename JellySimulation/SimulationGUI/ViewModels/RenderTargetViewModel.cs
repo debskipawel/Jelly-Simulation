@@ -52,7 +52,7 @@ namespace SpringSimulationGUI.ViewModels
             dx = moveSensitivity * dx * MathF.PI / 180.0f;
             dy = moveSensitivity * dy * MathF.PI / 180.0f;
 
-            InteropMethods.MoveCamera(dx, dy);
+            InteropMethods.MoveOnMiddleClick(dx, dy);
 
             this.x = (float)p.X;
             this.y = (float)p.Y;
@@ -62,7 +62,7 @@ namespace SpringSimulationGUI.ViewModels
         {
             float dd = -e.Delta * zoomSensitivity;
 
-            InteropMethods.Zoom(dd);
+            InteropMethods.Scroll(dd);
         }
     }
 }

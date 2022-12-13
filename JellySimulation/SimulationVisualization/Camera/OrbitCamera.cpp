@@ -22,7 +22,7 @@ Matrix OrbitCamera::GetViewMatrix()
 {
 	Vector3 position = GetEyePosition();
 
-	Vector3 dir = GetEyeDirection();
+	Vector3 dir = GetFront();
 	Vector3 up = Vector3::Transform(
 		Vector3{ 0.0f, 0.0f, 1.0f },
 		Matrix::CreateRotationX(m_angleX) * Matrix::CreateRotationZ(m_angleZ)
@@ -33,15 +33,35 @@ Matrix OrbitCamera::GetViewMatrix()
 
 Vector3 OrbitCamera::GetEyePosition()
 {
-	auto dir = GetEyeDirection();
+	auto dir = GetFront();
 	return m_target - m_distance * dir;
 }
 
-Vector3 OrbitCamera::GetEyeDirection()
+Vector3 OrbitCamera::GetFront()
 {
 	Vector3 dir = Vector3::Transform(
 		Vector3 { 0.0f, 1.0f, 0.0f }, 
 		Matrix::CreateRotationX(m_angleX) * Matrix::CreateRotationZ(m_angleZ)
+	);
+
+	return dir;
+}
+
+Vector3 OrbitCamera::GetUp()
+{
+	Vector3 dir = Vector3::Transform(
+		Vector3{ 0.0f, 0.0f, 1.0f },
+		Matrix::CreateRotationX(m_angleX) * Matrix::CreateRotationZ(m_angleZ)
+	);
+
+	return dir;
+}
+
+Vector3 OrbitCamera::GetRight()
+{
+	Vector3 dir = Vector3::Transform(
+		Vector3{ 1.0f, 0.0f, 0.0f },
+		Matrix::CreateRotationZ(m_angleZ)
 	);
 
 	return dir;

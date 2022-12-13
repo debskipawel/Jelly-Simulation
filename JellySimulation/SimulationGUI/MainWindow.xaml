@@ -12,37 +12,20 @@
 	<Grid x:Name="main">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="250"/>
-			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="250"/>
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="2*"/>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+
 			<RowDefinition Height="2*"/>
 		</Grid.RowDefinitions>
-		<Grid.DataContext>
-			<local_vm:SimulationViewModel/>
-		</Grid.DataContext>
+        <Grid.DataContext>
+            <local_vm:SimulationViewModel/>
+        </Grid.DataContext>
 
-		<StackPanel Orientation="Horizontal" Background="LightGray"
-						Grid.ColumnSpan="3">
-			<Button Style="{StaticResource SquareButton}" Command="{Binding Resume}">
-				<Image Source="/Resources/Icons/play.png"></Image>
-			</Button>
-			<Button Style="{StaticResource SquareButton}" Command="{Binding Pause}">
-				<Image Source="/Resources/Icons/pause.png"></Image>
-			</Button>
-			<Button Style="{StaticResource SquareButton}" Command="{Binding Restart}">
-				<Image Source="/Resources/Icons/restart.png"></Image>
-			</Button>
-		</StackPanel>
-
-		<StackPanel Grid.Row="1" Grid.RowSpan="4">
+        <StackPanel Grid.RowSpan="4">
 			<StackPanel Margin="5 5">
 				<TextBlock Margin="2 2" FontWeight="Bold" Text="Simulation parameters:"/>
-                <Label FontStyle="Italic">(RESTART SIMULATION TO APPLY)</Label>
 				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
 					<Label>Edge length:</Label>
 					<numeric:FloatBox 
@@ -96,31 +79,9 @@
                 <CheckBox Margin="5 5" Content="Gravity on" IsChecked="{Binding GravityOn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
             <Separator></Separator>
-            <StackPanel Margin="5 5">
-                <StackPanel.DataContext>
-                    <local_vm:VisualizationViewModel />
-                </StackPanel.DataContext>
-                
-                <TextBlock Margin="2 2" FontWeight="Bold" Text="Visualization parameters:"/>
+        </StackPanel>
 
-                <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
-                    <Label>Trace length:</Label>
-                    <numeric:IntBox 
-						DockPanel.Dock="Right"
-						Value="{Binding TraceLength, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-						ValidationTrigger="PropertyChanged"
-						MinValue="0" MaxValue="500000"
-						Width="80" />
-                </DockPanel>
-                <CheckBox Margin="5 5" Content="Render trace" IsChecked="{Binding ShowTrace, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <CheckBox Margin="5 5" Content="Render cube" IsChecked="{Binding ShowCube, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <CheckBox Margin="5 5" Content="Render diagonal" IsChecked="{Binding ShowDiagonal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
-            <Separator></Separator>
-            
-		</StackPanel>
-
-		<Grid x:Name="host" Grid.Row="1" Grid.RowSpan="4" Grid.Column="1" Grid.ColumnSpan="2">
+		<Grid x:Name="host" Grid.RowSpan="4" Grid.Column="1">
 			<Grid.DataContext>
                 <local_vm:RenderTargetViewModel />
 			</Grid.DataContext>

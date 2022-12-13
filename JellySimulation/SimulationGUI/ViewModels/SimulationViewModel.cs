@@ -8,12 +8,6 @@ namespace SpringSimulationGUI.ViewModels
     {
         protected SpinningCubeSimulationModel model;
 
-        public RelayCommand Resume { get; protected set; }
-        
-        public RelayCommand Pause { get; protected set; }
-        
-        public RelayCommand Restart { get; protected set; }
-
         public bool IsPaused { get; set; }
 
         public bool WasStarted { get; set; }
@@ -48,69 +42,12 @@ namespace SpringSimulationGUI.ViewModels
             set { model.IntegrationStep = value; NotifyPropertyChanged(); }
         }
 
-        public bool GravityOn
-        {
-            get => model.GravityOn;
-            set { 
-                model.GravityOn = value; 
-                NotifyPropertyChanged();
-                InteropMethods.ToggleGravity(value);
-            }
-           
-        }
         public SimulationViewModel()
         {   
             this.IsPaused = false;
             this.WasStarted = false;
 
             this.model = new SpinningCubeSimulationModel();
-
-            this.Resume = new RelayCommand
-                (
-                    () => this.ResumeSimulation(),
-                    (object _) => this.IsPaused
-                );
-
-            this.Pause = new RelayCommand
-            (
-                () => this.PauseSimulation(),
-                (object _) => !this.IsPaused && this.WasStarted
-            );
-
-            this.Restart = new RelayCommand
-            (
-                () => this.RestartSimulation(),
-                (object _) => true
-            );
-        }
-
-        protected void ResumeSimulation()
-        {
-            this.IsPaused = false;
-
-            InteropMethods.OnSimulationResume();
-        }
-
-        protected void PauseSimulation()
-        {
-            this.IsPaused = true;
-
-            InteropMethods.OnSimulationPause();
-        }
-
-        protected void RestartSimulation()
-        {
-            this.WasStarted = true;
-            this.IsPaused = false;
-
-            InteropMethods.OnSimulationRestart(
-                model.EdgeLength,
-                model.Density,
-                model.Deviation,
-                model.AngularVelocity,
-                model.IntegrationStep,
-                model.GravityOn
-            );
         }
     }
 }

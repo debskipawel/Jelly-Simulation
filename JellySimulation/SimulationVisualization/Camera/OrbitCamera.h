@@ -12,7 +12,10 @@ public:
 	virtual Matrix GetViewMatrix() override;
 	
 	virtual Vector3 GetEyePosition() override;
-	virtual Vector3 GetEyeDirection() override;
+	
+	virtual Vector3 GetFront() override;
+	virtual Vector3 GetUp() override;
+	virtual Vector3 GetRight() override;
 
 	virtual void ProcessMouseMove(float dx, float dy) override;
 	virtual void Zoom(float dd) override;

@@ -190,9 +190,11 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClInclude Include="Components\Dependency\DependencyComponent.h" />
     <ClInclude Include="Components\Particles\ParticleEmitterComponent.h" />
     <ClInclude Include="Components\PhysicsComponent.h" />
+    <ClInclude Include="Components\Physics\DynamicSpring.h" />
     <ClInclude Include="Components\Rendering\DepthStateComponent.h" />
     <ClInclude Include="Components\Rendering\RenderingComponent.h" />
     <ClInclude Include="Components\Rendering\TessellationComponent.h" />
+    <ClInclude Include="Components\SpringsComponent.h" />
     <ClInclude Include="Components\TransformComponent.h" />
     <ClInclude Include="Core\App.h" />
     <ClInclude Include="DirectX\Buffers\D11Buffer.h" />

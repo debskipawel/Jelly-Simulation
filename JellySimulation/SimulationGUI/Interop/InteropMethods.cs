@@ -21,32 +21,18 @@ namespace SpringSimulationGUI.Interop
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void Render(IntPtr resourcePointer, bool isNewSurface);
 
+        
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void OnSimulationRestart(float edge, float density, float deviation, float angularVelocity, float integrationStep, bool gravityOn);
+        public static extern void MoveOnLeftClick(float dx, float dy);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void OnSimulationPause();
+        public static extern void MoveOnMiddleClick(float dx, float dy);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void OnSimulationResume();
+        public static extern void MoveOnRightClick(float dx, float dy);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MoveCamera(float dx, float dy);
-
-        [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void Zoom(float dd);
-
-        [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DisplayCubeChanged(bool display);
-
-        [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DisplayDiagonalChanged(bool display);
-
-        [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DisplayTraceChanged(bool display, uint traceLength);
-
-        [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ToggleGravity(bool gravityOn);
+        public static extern void Scroll(float dd);
 
         /// <summary>
         /// Method used to invoke an Action that will catch DllNotFoundExceptions and display a warning dialog.
