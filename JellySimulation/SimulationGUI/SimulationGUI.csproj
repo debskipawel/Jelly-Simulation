@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Icons\pause.png" />
+    <None Remove="Resources\Icons\play.png" />
+    <None Remove="Resources\Icons\restart.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Gu.Wpf.NumericInput" Version="0.5.5" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.501" />
+    <PackageReference Include="Microsoft.Wpf.Interop.DirectX-x64" Version="0.9.0-beta-22856" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Icons\pause.png" />
+    <Resource Include="Resources\Icons\play.png" />
+    <Resource Include="Resources\Icons\restart.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SimulationVisualization\SimulationVisualization.vcxproj" />
+  </ItemGroup>
+
+</Project>

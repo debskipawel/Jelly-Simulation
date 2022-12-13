@@ -1,0 +1,148 @@
+﻿<Window x:Class="SpringSimulationGUI.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:dx="clr-namespace:Microsoft.Wpf.Interop.DirectX;assembly=Microsoft.Wpf.Interop.DirectX"
+        xmlns:local_vm="clr-namespace:SpringSimulationGUI.ViewModels"
+		xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+		xmlns:numeric="http://gu.se/NumericInput"
+		mc:Ignorable="d"
+		Title="You Spin Me Round (Like a Record)" Height="600" MinHeight="550" Width="1000" MinWidth="850">
+	<Grid x:Name="main">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="250"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="250"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="2*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="2*"/>
+		</Grid.RowDefinitions>
+		<Grid.DataContext>
+			<local_vm:SimulationViewModel/>
+		</Grid.DataContext>
+
+		<StackPanel Orientation="Horizontal" Background="LightGray"
+						Grid.ColumnSpan="3">
+			<Button Style="{StaticResource SquareButton}" Command="{Binding Resume}">
+				<Image Source="/Resources/Icons/play.png"></Image>
+			</Button>
+			<Button Style="{StaticResource SquareButton}" Command="{Binding Pause}">
+				<Image Source="/Resources/Icons/pause.png"></Image>
+			</Button>
+			<Button Style="{StaticResource SquareButton}" Command="{Binding Restart}">
+				<Image Source="/Resources/Icons/restart.png"></Image>
+			</Button>
+		</StackPanel>
+
+		<StackPanel Grid.Row="1" Grid.RowSpan="4">
+			<StackPanel Margin="5 5">
+				<TextBlock Margin="2 2" FontWeight="Bold" Text="Simulation parameters:"/>
+                <Label FontStyle="Italic">(RESTART SIMULATION TO APPLY)</Label>
+				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+					<Label>Edge length:</Label>
+					<numeric:FloatBox 
+						DockPanel.Dock="Right"
+						Value="{Binding EdgeLength, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0.1" MaxValue="5"
+						Width="80" />
+				</DockPanel>
+
+				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+					<Label>Density:</Label>
+					<numeric:FloatBox 
+						DockPanel.Dock="Right"
+						Value="{Binding Density, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0" MaxValue="5"
+						Width="80" />
+				</DockPanel>
+
+				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+					<Label>Deviation:</Label>
+					<numeric:FloatBox 
+						DockPanel.Dock="Right"
+						Value="{Binding Deviation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0" MaxValue="90"
+						Width="80" />
+				</DockPanel>
+
+				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+					<Label>Angular velocity:</Label>
+					<numeric:FloatBox 
+						DockPanel.Dock="Right"
+						Value="{Binding AngularVelocity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0" MaxValue="100"
+						Width="80" />
+				</DockPanel>
+
+				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+					<Label>Integration step:</Label>
+					<numeric:FloatBox 
+						DockPanel.Dock="Right"
+						Value="{Binding IntegrationStep, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0" MaxValue="45"
+						Width="80" />
+				</DockPanel>
+                <Separator Height="10"/>
+                <CheckBox Margin="5 5" Content="Gravity on" IsChecked="{Binding GravityOn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <Separator></Separator>
+            <StackPanel Margin="5 5">
+                <StackPanel.DataContext>
+                    <local_vm:VisualizationViewModel />
+                </StackPanel.DataContext>
+                
+                <TextBlock Margin="2 2" FontWeight="Bold" Text="Visualization parameters:"/>
+
+                <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+                    <Label>Trace length:</Label>
+                    <numeric:IntBox 
+						DockPanel.Dock="Right"
+						Value="{Binding TraceLength, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0" MaxValue="500000"
+						Width="80" />
+                </DockPanel>
+                <CheckBox Margin="5 5" Content="Render trace" IsChecked="{Binding ShowTrace, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Margin="5 5" Content="Render cube" IsChecked="{Binding ShowCube, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Margin="5 5" Content="Render diagonal" IsChecked="{Binding ShowDiagonal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <Separator></Separator>
+            
+		</StackPanel>
+
+		<Grid x:Name="host" Grid.Row="1" Grid.RowSpan="4" Grid.Column="1" Grid.ColumnSpan="2">
+			<Grid.DataContext>
+                <local_vm:RenderTargetViewModel />
+			</Grid.DataContext>
+			<Image Stretch="Fill" Name="ImageHost" Cursor="Cross">
+				<Image.Source>
+					<dx:D3D11Image x:Name="InteropImage" />
+				</Image.Source>
+				<behaviors:Interaction.Triggers>
+					<behaviors:EventTrigger EventName="MouseDown">
+						<behaviors:CallMethodAction TargetObject="{Binding}" MethodName="MouseDown"/>
+					</behaviors:EventTrigger>
+					<behaviors:EventTrigger EventName="MouseUp">
+						<behaviors:CallMethodAction TargetObject="{Binding}" MethodName="MouseUp"/>
+					</behaviors:EventTrigger>
+					<behaviors:EventTrigger EventName="MouseMove">
+						<behaviors:CallMethodAction TargetObject="{Binding}" MethodName="MouseMove"/>
+					</behaviors:EventTrigger>
+					<behaviors:EventTrigger EventName="MouseWheel">
+						<behaviors:CallMethodAction TargetObject="{Binding}" MethodName="MouseWheel"/>
+					</behaviors:EventTrigger>
+				</behaviors:Interaction.Triggers>
+			</Image>
+		</Grid>
+	</Grid>
+</Window>
