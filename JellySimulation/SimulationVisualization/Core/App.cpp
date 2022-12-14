@@ -20,8 +20,12 @@ App::App()
 	: m_scene(),
 	  m_lastFrameTime(0.0f), m_residualSimulationTime(0.0f),
 	  m_renderer(std::make_shared<D11Renderer>()),
-	  m_simulationTimeStep(0.01f), m_controlPointMass(1.0f)
+	  m_simulationTimeStep(0.01f), m_controlPointMass(1.0f / 64),
+	  m_stickiness(0.1f), m_elasticityBetweenMasses(0.5f), m_elasticityOnSteeringSprings(0.5f),
+	  m_maxInitialImbalance(0.05f)
 {
+	this->InitializeControlFrame();
+
 	m_lastFrameTime = Clock::Now();
 	m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene);
 
@@ -70,6 +74,17 @@ void App::MoveSteeringCube(float dx, float dy)
 	auto& transform = m_renderSteeringFrame.GetComponent<TransformComponent>();
 	transform.Position += move;
 
+	// moving all points of control frame so springs attached know they should apply forces
+	m_controlFrameCenter += move;
+
+	std::for_each(std::execution::par, m_controlFrame.begin(), m_controlFrame.end(),
+		[move](SceneObject object)
+		{
+			auto& transform = object.GetComponent<TransformComponent>();
+			transform.Position += move;
+		}
+	);
+
 	// TODO: dodac kolizje
 }
 
@@ -85,6 +100,7 @@ void App::Zoom(float dd)
 
 void App::UpdatePhysics()
 {
+	// applying forces from springs
 	for (auto it = m_scene.Begin<SpringsComponent>(); it != m_scene.End<SpringsComponent>(); ++it)
 	{
 		auto entity = it.Get();
@@ -92,22 +108,26 @@ void App::UpdatePhysics()
 		auto& springs = entity.GetComponent<SpringsComponent>();
 		auto& transform = entity.GetComponent<TransformComponent>();
 		auto& physics = entity.GetComponent<PhysicsComponent>();
+		physics.Forces = Vector3::Zero;
 
 		auto position = transform.Position;
 
 		for (auto& spring : springs.springs)
 		{
 			auto attachment = spring.attached;
-			auto attachedPosition = attachment.GetComponent<TransformComponent>().Position;
-			auto attachedVelocity = attachment.GetComponent<PhysicsComponent>().Velocity;
 
-			auto positionDifference = attachedPosition - position;
+			auto attachedPosition = attachment.GetComponent<TransformComponent>().Position;
+			auto attachedVelocity = attachment.HasComponent<PhysicsComponent>()
+				? attachment.GetComponent<PhysicsComponent>().Velocity
+				: Vector3::Zero;
+
+			auto relativePosition = attachedPosition - position;
 			auto relativeVelocity = attachedVelocity - physics.Velocity;
 
-			auto forceDirection = positionDifference;
+			auto forceDirection = relativePosition;
 			forceDirection.Normalize();
 
-			auto deviation = positionDifference.Length() - spring.initialLength;
+			auto deviation = relativePosition.Length() - spring.initialLength;
 			auto deviationDeriv = forceDirection.Dot(relativeVelocity);
 			
 			auto forceValue = -(m_stickiness * deviationDeriv + spring.elasticity * deviation);
@@ -151,7 +171,7 @@ void App::RestartSimulation(float pointMass, float stickiness, float massesElast
 
 void App::InitializeControlPoints()
 {
-	const Vector3 cubeCenterPosition = Vector3::Zero;
+	const Vector3 cubeCenterPosition = m_controlFrameCenter;
 	const Vector3 initialPoint = -CUBE_SIDE / 2 * Vector3::One + cubeCenterPosition;
 
 	for (auto& point : m_controlPoints)
@@ -221,6 +241,34 @@ void App::InitializeControlPoints()
 			transform.Position += Vector3{ dx, dy, dz };
 		}
 	);
+}
+
+void App::InitializeControlFrame()
+{
+	if (m_controlPoints.size() != 64)
+	{
+		InitializeControlPoints();
+	}
+
+	const Vector3 cubeCenterPosition = m_controlFrameCenter;
+	const Vector3 initialPoint = -CUBE_SIDE / 2 * Vector3::One + cubeCenterPosition;
+
+	unsigned short attachedVertices[] = { 0, 3, 12, 15, 48, 51, 60, 63 };
+
+	for (int i = 0; i < 8; i++)
+	{
+		auto& attachedObject = m_controlPoints[attachedVertices[i]];
+		auto position = attachedObject.GetComponent<TransformComponent>().Position;
+
+		SceneObject object(m_scene);
+		auto& transform = object.AddComponent<TransformComponent>();
+		transform.Position = position;
+
+		m_controlFrame.push_back(object);
+
+		auto& springs = attachedObject.GetComponent<SpringsComponent>();
+		springs.springs.push_back(DynamicSpring{ object, 0.0f, m_elasticityOnSteeringSprings });
+	}
 }
 
 void App::UpdateMesh()

@@ -30,6 +30,7 @@ public:
 protected:
 
 	void InitializeControlPoints();
+	void InitializeControlFrame();
 	void UpdateMesh();
 
 	float m_elasticityBetweenMasses;
@@ -43,6 +44,8 @@ protected:
 	float m_lastFrameTime;
 	float m_fullSimulationTime;
 	float m_residualSimulationTime;
+
+	Vector3 m_controlFrameCenter = Vector3::Zero;
 
 	Scene m_scene;
 	std::shared_ptr<D11Renderer> m_renderer;
