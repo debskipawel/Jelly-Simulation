@@ -11,5 +11,8 @@ struct PhysicsComponent
 	{
 	}
 
+	Vector3 Velocity;
+
 	float Mass;
+	Vector3 Forces;
 };

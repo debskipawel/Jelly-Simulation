@@ -8,10 +8,10 @@
 		xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
 		xmlns:numeric="http://gu.se/NumericInput"
 		mc:Ignorable="d"
-		Title="You Spin Me Round (Like a Record)" Height="600" MinHeight="550" Width="1000" MinWidth="850">
+		Title="Watch my cheeks shake like jelly" Height="600" MinHeight="550" Width="1000" MinWidth="850">
 	<Grid x:Name="main">
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="250"/>
+			<ColumnDefinition Width="280"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -27,58 +27,78 @@
 			<StackPanel Margin="5 5">
 				<TextBlock Margin="2 2" FontWeight="Bold" Text="Simulation parameters:"/>
 				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
-					<Label>Edge length:</Label>
+					<Label>Control point mass:</Label>
 					<numeric:FloatBox 
 						DockPanel.Dock="Right"
-						Value="{Binding EdgeLength, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						Value="{Binding ControlPointMass, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0.01" MaxValue="100"
+						Width="80" />
+				</DockPanel>
+
+                <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+                    <Label>Stickiness:</Label>
+                    <numeric:FloatBox 
+						DockPanel.Dock="Right"
+						Value="{Binding Stickiness, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 						ValidationTrigger="PropertyChanged"
 						MinValue="0.1" MaxValue="5"
 						Width="80" />
-				</DockPanel>
+                </DockPanel>
 
-				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
-					<Label>Density:</Label>
-					<numeric:FloatBox 
+                <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+                    <Label>Elasticity between masses:</Label>
+                    <numeric:FloatBox 
 						DockPanel.Dock="Right"
-						Value="{Binding Density, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						Value="{Binding ElasticityBetweenMasses, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 						ValidationTrigger="PropertyChanged"
-						MinValue="0" MaxValue="5"
+						MinValue="0" MaxValue="1"
 						Width="80" />
-				</DockPanel>
+                </DockPanel>
 
-				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
-					<Label>Deviation:</Label>
-					<numeric:FloatBox 
+                <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+                    <Label>Elasticity on steering springs:</Label>
+                    <numeric:FloatBox 
 						DockPanel.Dock="Right"
-						Value="{Binding Deviation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						Value="{Binding ElasticityOnSteeringSprings, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 						ValidationTrigger="PropertyChanged"
-						MinValue="0" MaxValue="90"
+						MinValue="0" MaxValue="1"
 						Width="80" />
-				</DockPanel>
+                </DockPanel>
 
-				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
-					<Label>Angular velocity:</Label>
-					<numeric:FloatBox 
+                <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+                    <Label>Max initial imbalance:</Label>
+                    <numeric:FloatBox 
 						DockPanel.Dock="Right"
-						Value="{Binding AngularVelocity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						Value="{Binding MaxInitialImbalance, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 						ValidationTrigger="PropertyChanged"
-						MinValue="0" MaxValue="100"
+						MinValue="0" MaxValue="1"
 						Width="80" />
-				</DockPanel>
+                </DockPanel>
 
-				<DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
-					<Label>Integration step:</Label>
-					<numeric:FloatBox 
-						DockPanel.Dock="Right"
-						Value="{Binding IntegrationStep, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-						ValidationTrigger="PropertyChanged"
-						MinValue="0" MaxValue="45"
-						Width="80" />
-				</DockPanel>
                 <Separator Height="10"/>
                 <CheckBox Margin="5 5" Content="Gravity on" IsChecked="{Binding GravityOn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
+            
             <Separator></Separator>
+            
+            <StackPanel Margin="5 5">
+                <StackPanel.DataContext>
+                    <local_vm:VisualizationViewModel></local_vm:VisualizationViewModel>
+                </StackPanel.DataContext>
+                
+                <TextBlock Margin="2 2" FontWeight="Bold" Text="Visualization parameters:"></TextBlock>
+                
+                <CheckBox Margin="5 5" Content="Draw control points" IsChecked="{Binding DrawControlPoints, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                <CheckBox Margin="5 5" Content="Draw steering frame" IsChecked="{Binding DrawControlPoints, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                <CheckBox Margin="5 5" Content="Draw shaded cube" IsChecked="{Binding DrawControlPoints, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+
+            </StackPanel>
+
+            <Separator></Separator>
+
+            <Button Margin="5 5" Content="Restart simulation" Command="{Binding RestartSimulationCommand}">
+            </Button>
         </StackPanel>
 
 		<Grid x:Name="host" Grid.RowSpan="4" Grid.Column="1">

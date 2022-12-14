@@ -6,4 +6,5 @@ struct DynamicSpring
 {
 	SceneObject attached;
 	float initialLength;
+	float elasticity;
 };

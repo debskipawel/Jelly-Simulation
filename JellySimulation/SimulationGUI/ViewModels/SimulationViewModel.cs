@@ -1,53 +1,55 @@
 ﻿using SpringSimulationGUI.Interop;
-using SpringSimulationGUI.Models;
+using SimulationGUI.Models;
 using SpringSimulationGUI.ViewModels.Commands;
+using System.Windows.Input;
 
 namespace SpringSimulationGUI.ViewModels
 {
     public class SimulationViewModel : ObservableObject
     {
-        protected SpinningCubeSimulationModel model;
+        protected JellySimulationModel model;
 
-        public bool IsPaused { get; set; }
+        public ICommand RestartSimulationCommand { get; set; }
 
-        public bool WasStarted { get; set; }
-
-        public float EdgeLength
+        public float ControlPointMass
         {
-            get => model.EdgeLength;
-            set { model.EdgeLength = value; NotifyPropertyChanged(); }
+            get => model.ControlPointMass;
+            set { model.ControlPointMass = value; NotifyPropertyChanged(); }
         }
 
-        public float Density
+        public float Stickiness
         {
-            get => model.Density;
-            set { model.Density = value; NotifyPropertyChanged(); }
+            get => model.Stickiness;
+            set { model.Stickiness = value; NotifyPropertyChanged(); }
         }
 
-        public float Deviation
+        public float ElasticityBetweenMasses
         {
-            get => model.Deviation;
-            set { model.Deviation = value; NotifyPropertyChanged(); }
+            get => model.ElasticityBetweenMasses;
+            set { model.ElasticityBetweenMasses = value; NotifyPropertyChanged(); }
         }
 
-        public float AngularVelocity
+        public float ElasticityOnSteeringSprings
         {
-            get => model.AngularVelocity;
-            set { model.AngularVelocity = value; NotifyPropertyChanged(); }
+            get => model.ElasticityOnSteeringSprings;
+            set { model.ElasticityOnSteeringSprings = value; NotifyPropertyChanged(); }
         }
 
-        public float IntegrationStep
+        public float MaxInitialImbalance
         {
-            get => model.IntegrationStep;
-            set { model.IntegrationStep = value; NotifyPropertyChanged(); }
+            get => model.MaxInitialImbalance;
+            set { model.MaxInitialImbalance = value; NotifyPropertyChanged(); }
         }
 
         public SimulationViewModel()
         {   
-            this.IsPaused = false;
-            this.WasStarted = false;
+            this.model = new();
+            this.RestartSimulationCommand = new RelayCommand(RestartSimulation, (_) => true);
+        }
 
-            this.model = new SpinningCubeSimulationModel();
+        private void RestartSimulation()
+        {
+            InteropMethods.RestartSimulation(ControlPointMass, Stickiness, ElasticityBetweenMasses, ElasticityOnSteeringSprings, MaxInitialImbalance);
         }
     }
 }

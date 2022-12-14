@@ -33,6 +33,7 @@ using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 #include <algorithm>
+#include <execution>
 #include <numeric>
 #include <limits>
 

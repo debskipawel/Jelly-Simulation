@@ -41,6 +41,10 @@ extern bool __cdecl Cleanup()
 
 extern void __cdecl MoveOnLeftClick(float dx, float dy)
 {
+	if (!g_app)
+		return;
+
+	g_app->MoveSteeringCube(dx, -dy);
 }
 
 extern void __cdecl MoveOnMiddleClick(float dx, float dy)
@@ -61,4 +65,20 @@ extern void __cdecl Scroll(float dd)
 		return;
 
 	g_app->Zoom(dd);
+}
+
+void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube)
+{
+	if (!g_app)
+		return;
+	// TODO: uncomment
+	// g_app->UpdateVisualizationParameters(drawControlPoints, drawSteeringCube, drawShadedCube);
+}
+
+void __cdecl RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float maxImbalance)
+{
+	if (!g_app)
+		return;
+
+	g_app->RestartSimulation(pointMass, stickiness, massesElasticity, steeringSpringsElasticity, maxImbalance);
 }
