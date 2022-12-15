@@ -149,7 +149,7 @@ void App::UpdatePhysics()
 
 		auto acceleration = force / mass;
 
-		transform.Position = position + velocity * m_simulationTimeStep + acceleration * m_simulationTimeStep * m_simulationTimeStep / 2.0f;
+		transform.Position += velocity * m_simulationTimeStep;
 		physics.Velocity += acceleration * m_simulationTimeStep;
 	}
 }
