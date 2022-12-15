@@ -27,9 +27,11 @@ App::App()
 	this->InitializeControlFrame();
 
 	m_lastFrameTime = Clock::Now();
-	m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene);
+	//m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene);
 
 	m_grid = EntityFactory::CreateWorldGrid(m_renderer->Device(), m_scene);
+
+	InitializeMesh();
 }
 
 void App::Update(float deltaTime)
@@ -71,8 +73,8 @@ void App::MoveSteeringCube(float dx, float dy)
 	auto camera = m_scene.Camera();
 	auto move = dx * camera->GetRight() + dy * camera->GetUp();
 
-	auto& transform = m_renderSteeringFrame.GetComponent<TransformComponent>();
-	transform.Position += move;
+	//auto& transform = m_renderSteeringFrame.GetComponent<TransformComponent>();
+	//transform.Position += move;
 
 	// moving all points of control frame so springs attached know they should apply forces
 	m_controlFrameCenter += move;
@@ -139,7 +141,19 @@ void App::UpdatePhysics()
 	for (auto it = m_scene.Begin<PhysicsComponent>(); it != m_scene.End<PhysicsComponent>(); ++it)
 	{
 		auto entity = it.Get();
-		auto& component = entity.GetComponent<PhysicsComponent>();
+
+		auto& physics = entity.GetComponent<PhysicsComponent>();
+		auto& transform = entity.GetComponent<TransformComponent>();
+
+		auto position = transform.Position;
+		auto velocity = physics.Velocity;
+		auto force = physics.Forces;
+		auto mass = physics.Mass;
+
+		auto acceleration = force / mass;
+
+		transform.Position = position + velocity * m_simulationTimeStep + acceleration * m_simulationTimeStep * m_simulationTimeStep / 2.0f;
+		physics.Velocity += acceleration * m_simulationTimeStep;
 	}
 }
 
@@ -257,12 +271,15 @@ void App::InitializeControlFrame()
 
 	for (int i = 0; i < 8; i++)
 	{
+		auto x = (float)(i % 2);
+		auto y = (float)((i / 2) % 2);
+		auto z = (float)(i / 4);
+
 		auto& attachedObject = m_controlPoints[attachedVertices[i]];
-		auto position = attachedObject.GetComponent<TransformComponent>().Position;
 
 		SceneObject object(m_scene);
 		auto& transform = object.AddComponent<TransformComponent>();
-		transform.Position = position;
+		transform.Position = CUBE_SIDE * Vector3{ x, y, z } + initialPoint;
 
 		m_controlFrame.push_back(object);
 
@@ -271,6 +288,22 @@ void App::InitializeControlFrame()
 	}
 }
 
+void App::InitializeMesh()
+{
+	m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene);
+}
+
 void App::UpdateMesh()
 {
+	// update steering frame
+	std::vector<Vector3> steeringFramePositions(m_controlFrame.size());
+	std::transform(m_controlFrame.begin(), m_controlFrame.end(), steeringFramePositions.begin(),
+		[](SceneObject object)
+		{
+			return object.GetComponent<TransformComponent>().Position;
+		}
+	);
+
+	auto& steeringFrameRendering = m_renderSteeringFrame.GetComponent<RenderingComponent>();
+	steeringFrameRendering.VertexBuffer->Update(steeringFramePositions.data(), steeringFramePositions.size() * sizeof(Vector3));
 }

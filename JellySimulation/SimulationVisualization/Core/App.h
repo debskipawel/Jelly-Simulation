@@ -31,6 +31,8 @@ protected:
 
 	void InitializeControlPoints();
 	void InitializeControlFrame();
+	
+	void InitializeMesh();
 	void UpdateMesh();
 
 	float m_elasticityBetweenMasses;

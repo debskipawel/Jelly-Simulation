@@ -14,25 +14,15 @@
 #include <Resources/Meshes/CubeNormal.h>
 #include <Resources/Meshes/WorldGrid.h>
 
-SceneObject EntityFactory::CreateCube(const D11Device& device, Scene& scene, float side)
+SceneObject EntityFactory::CreateCube(const D11Device& device, Scene& scene)
 {
     auto cube = SceneObject(scene);
 
-    auto transformMatrix = Matrix::CreateTranslation(0.5, 0.5, 0.5) * Matrix::CreateScale(side) * Matrix::CreateRotationZ(XM_PIDIV4)* Matrix::CreateRotationX(acosf(1.0f / sqrtf(3))) ;
-    std::vector<Vector3> transformedVertices(g_cubeNormalVertices.size());
+    auto vb = std::make_shared<D11VertexBuffer>(device, g_cubePositionVertices.size() * sizeof(Vector3), g_cubePositionLayout, g_cubePositionVertices.data());
+    auto ib = std::make_shared<D11IndexBuffer>(device, DXGI_FORMAT_R16_UINT, g_cubePositionIndices.size() * sizeof(unsigned short), g_cubePositionIndices.data(), D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
-    std::transform(g_cubeNormalVertices.begin(), g_cubeNormalVertices.end(), transformedVertices.begin(),
-        [transformMatrix](const Vector3& v)
-        {
-            return Vector3::Transform(v, transformMatrix);
-        }
-    );
-
-    auto vb = std::make_shared<D11VertexBuffer>(device, transformedVertices.size() * sizeof(Vector3), g_cubeNormalLayout, transformedVertices.data());
-    auto ib = std::make_shared<D11IndexBuffer>(device, DXGI_FORMAT_R16_UINT, g_cubeNormalIndices.size() * sizeof(unsigned short), g_cubeNormalIndices.data());
-
-    auto vs = D11ShaderLoader::VSLoad(device, L"../shaders_bin/mvp_vs.hlsl", g_cubeNormalLayout, { 4 * sizeof(Matrix) });
-    auto ps = D11ShaderLoader::PSLoad(device, L"../shaders_bin/lighting_ps.hlsl");
+    auto vs = D11ShaderLoader::VSLoad(device, L"../shaders_bin/mvp_pos_vs.hlsl", g_cubePositionLayout, { 4 * sizeof(Matrix) });
+    auto ps = D11ShaderLoader::PSLoad(device, L"../shaders_bin/solid_white_ps.hlsl");
 
     cube.AddComponent<RenderingComponent>(
         vb, ib, vs, ps,
@@ -51,7 +41,7 @@ SceneObject EntityFactory::CreateCube(const D11Device& device, Scene& scene, flo
             rendering.VertexShader->UpdateConstantBuffer(0, buf, 4 * sizeof(Matrix));
         }
     );
-    cube.AddComponent<TransformComponent>(Vector3{ 0.0f, 0.0f, side * sqrtf(3) / 2.0f }, Quaternion::Identity, Vector3::One);
+    cube.AddComponent<TransformComponent>();
 
     return cube;
 }
