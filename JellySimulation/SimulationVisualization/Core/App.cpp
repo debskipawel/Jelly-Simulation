@@ -21,7 +21,7 @@ App::App()
 	  m_lastFrameTime(0.0f), m_residualSimulationTime(0.0f),
 	  m_renderer(std::make_shared<D11Renderer>()),
 	  m_simulationTimeStep(0.01f), m_controlPointMass(1.0f),
-	  m_stickiness(0.1f), m_elasticityBetweenMasses(0.5f), m_elasticityOnSteeringSprings(0.5f),
+	  m_stickiness(0.1f), m_elasticityBetweenMasses(1.0f), m_elasticityOnSteeringSprings(1.0f),
 	  m_maxInitialImbalance(0.05f)
 {
 	this->InitializeControlFrame();
@@ -72,9 +72,6 @@ void App::MoveSteeringCube(float dx, float dy)
 	auto camera = m_scene.Camera();
 	auto move = dx * camera->GetRight() + dy * camera->GetUp();
 
-	//auto& transform = m_renderSteeringFrame.GetComponent<TransformComponent>();
-	//transform.Position += move;
-
 	// moving all points of control frame so springs attached know they should apply forces
 	m_controlFrameCenter += move;
 
@@ -101,41 +98,42 @@ void App::Zoom(float dd)
 
 void App::UpdatePhysics()
 {
+	auto stickiness = m_stickiness;
+	
 	// applying forces from springs
-	for (auto it = m_scene.Begin<SpringsComponent>(); it != m_scene.End<SpringsComponent>(); ++it)
-	{
-		auto entity = it.Get();
-		
-		auto& springs = entity.GetComponent<SpringsComponent>();
-		auto& transform = entity.GetComponent<TransformComponent>();
-		auto& physics = entity.GetComponent<PhysicsComponent>();
-		physics.Forces = Vector3::Zero;
-
-		auto position = transform.Position;
-
-		for (auto& spring : springs.springs)
+	std::for_each(std::execution::par, m_controlPoints.begin(), m_controlPoints.end(), [stickiness](const SpringDependentEntity& controlPoint)
 		{
-			auto attachment = spring.attached;
+			auto& springs = controlPoint.springs;
+			auto& transform = controlPoint.transform;
+			auto& physics = controlPoint.physics;
+			physics.Forces = Vector3::Zero;
 
-			auto attachedPosition = attachment.GetComponent<TransformComponent>().Position;
-			auto attachedVelocity = attachment.HasComponent<PhysicsComponent>()
-				? attachment.GetComponent<PhysicsComponent>().Velocity
-				: Vector3::Zero;
+			auto position = transform.Position;
 
-			auto relativePosition = attachedPosition - position;
-			auto relativeVelocity = attachedVelocity - physics.Velocity;
+			for (auto& spring : springs.springs)
+			{
+				auto attachment = spring.attached;
 
-			auto forceDirection = relativePosition;
-			forceDirection.Normalize();
+				auto attachedPosition = attachment.GetComponent<TransformComponent>().Position;
+				auto attachedVelocity = attachment.HasComponent<PhysicsComponent>()
+					? attachment.GetComponent<PhysicsComponent>().Velocity
+					: Vector3::Zero;
 
-			auto deviation = relativePosition.Length() - spring.initialLength;
-			auto deviationDeriv = forceDirection.Dot(relativeVelocity);
-			
-			auto forceValue = -(m_stickiness * deviationDeriv + spring.elasticity * deviation);
+				auto relativePosition = attachedPosition - position;
+				auto relativeVelocity = attachedVelocity - physics.Velocity;
 
-			physics.Forces -= forceDirection * forceValue;
+				auto forceDirection = relativePosition;
+				forceDirection.Normalize();
+
+				auto deviation = relativePosition.Length() - spring.initialLength;
+				auto deviationDeriv = forceDirection.Dot(relativeVelocity);
+
+				auto forceValue = -stickiness * deviationDeriv - spring.elasticity * deviation;
+
+				physics.Forces += -forceDirection * forceValue;
+			}
 		}
-	}
+	);
 
 	for (auto it = m_scene.Begin<PhysicsComponent>(); it != m_scene.End<PhysicsComponent>(); ++it)
 	{
@@ -189,7 +187,7 @@ void App::InitializeControlPoints()
 
 	for (auto& point : m_controlPoints)
 	{
-		point.Destroy();
+		point.object.Destroy();
 	}
 
 	m_controlPoints.clear();
@@ -205,16 +203,17 @@ void App::InitializeControlPoints()
 		auto& transform = point.AddComponent<TransformComponent>();
 		transform.Position = initialPoint + Vector3{ x * DISTANCE_BETWEEN_POINTS, y * DISTANCE_BETWEEN_POINTS, z * DISTANCE_BETWEEN_POINTS };
 
-		point.AddComponent<PhysicsComponent>(m_controlPointMass);
+		auto& physics = point.AddComponent<PhysicsComponent>(m_controlPointMass);
+		auto& springs = point.AddComponent<SpringsComponent>();
 
-		m_controlPoints.push_back(point);
+		m_controlPoints.push_back({ point, springs, physics, transform });
 	}
 
 	for (int i = 0; i < 64; i++)
 	{
 		auto& point1 = m_controlPoints[i];
-		auto& transform1 = point1.GetComponent<TransformComponent>();
-		auto& springsComponent = point1.AddComponent<SpringsComponent>();
+		auto& transform1 = point1.transform;
+		auto& springsComponent = point1.springs;
 
 		int x1 = i % 4;
 		int y1 = (i / 4) % 4;
@@ -229,11 +228,11 @@ void App::InitializeControlPoints()
 			if (abs(x2 - x1) <= 1 && abs(y2 - y1) <= 1 && abs(z2 - z1) <= 1 && i != j)
 			{
 				auto& point2 = m_controlPoints[j];
-				auto& transform2 = point2.GetComponent<TransformComponent>();
+				auto& transform2 = point2.transform;
 
 				auto positionDifference = transform2.Position - transform1.Position;
 
-				springsComponent.springs.push_back(DynamicSpring{ point2, positionDifference.Length(), m_elasticityBetweenMasses });
+				springsComponent.springs.push_back(DynamicSpring{ point2.object, positionDifference.Length(), m_elasticityBetweenMasses });
 			}
 		}
 	}
@@ -241,14 +240,14 @@ void App::InitializeControlPoints()
 	auto imbalance = m_maxInitialImbalance;
 
 	std::for_each(std::execution::par, m_controlPoints.begin(), m_controlPoints.end(),
-		[imbalance](SceneObject object)
+		[imbalance](SpringDependentEntity object)
 		{
 			Random r;
 			float dx = r.Next(-imbalance, imbalance);
 			float dy = r.Next(-imbalance, imbalance);
 			float dz = r.Next(-imbalance, imbalance);
 
-			auto& transform = object.GetComponent<TransformComponent>();
+			auto& transform = object.transform;
 			transform.Position += Vector3{ dx, dy, dz };
 		}
 	);
@@ -280,7 +279,7 @@ void App::InitializeControlFrame()
 	{
 		auto& attachedObject = m_controlPoints[attachedVertices[i]];
 
-		auto& springs = attachedObject.GetComponent<SpringsComponent>();
+		auto& springs = attachedObject.springs;
 		springs.springs.push_back(DynamicSpring{ m_controlFrame[i], 0.0f, m_elasticityOnSteeringSprings});
 	}
 }
@@ -308,9 +307,9 @@ void App::UpdateMesh()
 	// update control points
 	std::vector<Vector3> controlPointsPositions(m_controlPoints.size());
 	std::transform(m_controlPoints.begin(), m_controlPoints.end(), controlPointsPositions.begin(),
-		[](SceneObject object)
+		[](SpringDependentEntity object)
 		{
-			return object.GetComponent<TransformComponent>().Position;
+			return object.transform.Position;
 		}
 	);
 

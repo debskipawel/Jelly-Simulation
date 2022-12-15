@@ -214,6 +214,7 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClInclude Include="Resources\Meshes\Cube.h" />
     <ClInclude Include="Resources\Meshes\CubeNormal.h" />
     <ClInclude Include="Resources\Meshes\WorldGrid.h" />
+    <ClInclude Include="Resources\Structs\SpringDependentEntity.h" />
     <ClInclude Include="Scene\EntityFactory.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="DirectX\D11Device.h" />

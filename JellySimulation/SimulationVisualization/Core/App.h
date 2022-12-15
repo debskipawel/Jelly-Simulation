@@ -7,6 +7,8 @@
 #include <Scene/Scene.h>
 #include <Scene/SceneObject.h>
 
+#include <Resources/Structs/SpringDependentEntity.h>
+
 #include <memory>
 #include <ctime> 
 
@@ -54,7 +56,8 @@ protected:
 
 	SceneObject m_grid;
 	SceneObject m_mesh;
-	std::vector<SceneObject> m_controlPoints;
+
+	std::vector<SpringDependentEntity> m_controlPoints;
 	std::vector<SceneObject> m_controlFrame;
 
 	SceneObject m_renderControlPoints;

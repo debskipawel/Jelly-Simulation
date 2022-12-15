@@ -42,7 +42,7 @@
 						DockPanel.Dock="Right"
 						Value="{Binding Stickiness, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 						ValidationTrigger="PropertyChanged"
-						MinValue="0.1" MaxValue="5"
+						MinValue="0" MaxValue="100"
 						Width="80" />
                 </DockPanel>
 
@@ -52,7 +52,7 @@
 						DockPanel.Dock="Right"
 						Value="{Binding ElasticityBetweenMasses, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 						ValidationTrigger="PropertyChanged"
-						MinValue="0" MaxValue="1"
+						MinValue="0.01" MaxValue="100"
 						Width="80" />
                 </DockPanel>
 
@@ -62,7 +62,7 @@
 						DockPanel.Dock="Right"
 						Value="{Binding ElasticityOnSteeringSprings, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 						ValidationTrigger="PropertyChanged"
-						MinValue="0" MaxValue="1"
+						MinValue="0" MaxValue="100"
 						Width="80" />
                 </DockPanel>
 

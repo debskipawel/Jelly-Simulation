@@ -4,10 +4,10 @@
     {
         public JellySimulationModel()
         {
-            this.ControlPointMass = 1.0f / 64;
+            this.ControlPointMass = 1.0f;
             this.Stickiness = 0.1f;
-            this.ElasticityBetweenMasses = 0.5f;
-            this.ElasticityOnSteeringSprings = 0.5f;
+            this.ElasticityBetweenMasses = 1.0f;
+            this.ElasticityOnSteeringSprings = 1.0f;
             this.MaxInitialImbalance = 0.05f;
         }
 
