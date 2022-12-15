@@ -27,7 +27,6 @@ App::App()
 	this->InitializeControlFrame();
 
 	m_lastFrameTime = Clock::Now();
-	//m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene);
 
 	m_grid = EntityFactory::CreateWorldGrid(m_renderer->Device(), m_scene);
 
@@ -130,7 +129,7 @@ void App::UpdatePhysics()
 			forceDirection.Normalize();
 
 			auto deviation = relativePosition.Length() - spring.initialLength;
-			auto deviationDeriv = forceDirection.Dot(relativeVelocity);
+			auto deviationDeriv = 0.0f;//forceDirection.Dot(relativeVelocity);
 			
 			auto forceValue = -(m_stickiness * deviationDeriv + spring.elasticity * deviation);
 
@@ -227,17 +226,15 @@ void App::InitializeControlPoints()
 			int y2 = (j / 4) % 4;
 			int z2 = j / 16;
 
-			if (abs(x2 - x1) != 1 && abs(y2 - y1) != 1 && abs(z2 - z1) != 1)
+			if (abs(x2 - x1) <= 1 && abs(y2 - y1) <= 1 && abs(z2 - z1) <= 1 && i != j)
 			{
-				continue;
+				auto& point2 = m_controlPoints[j];
+				auto& transform2 = point2.GetComponent<TransformComponent>();
+
+				auto positionDifference = transform2.Position - transform1.Position;
+
+				springsComponent.springs.push_back(DynamicSpring{ point2, positionDifference.Length(), m_elasticityBetweenMasses });
 			}
-
-			auto& point2 = m_controlPoints[j];
-			auto& transform2 = point2.GetComponent<TransformComponent>();
-
-			auto positionDifference = transform2.Position - transform1.Position;
-
-			springsComponent.springs.push_back(DynamicSpring{ point2, positionDifference.Length(), m_elasticityBetweenMasses });
 		}
 	}
 
@@ -291,6 +288,7 @@ void App::InitializeControlFrame()
 void App::InitializeMesh()
 {
 	m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene);
+	m_renderControlPoints = EntityFactory::CreateBezierCube(m_renderer->Device(), m_scene);
 }
 
 void App::UpdateMesh()
@@ -306,4 +304,16 @@ void App::UpdateMesh()
 
 	auto& steeringFrameRendering = m_renderSteeringFrame.GetComponent<RenderingComponent>();
 	steeringFrameRendering.VertexBuffer->Update(steeringFramePositions.data(), steeringFramePositions.size() * sizeof(Vector3));
+
+	// update control points
+	std::vector<Vector3> controlPointsPositions(m_controlPoints.size());
+	std::transform(m_controlPoints.begin(), m_controlPoints.end(), controlPointsPositions.begin(),
+		[](SceneObject object)
+		{
+			return object.GetComponent<TransformComponent>().Position;
+		}
+	);
+
+	auto& controlPointsRendering = m_renderControlPoints.GetComponent<RenderingComponent>();
+	controlPointsRendering.VertexBuffer->Update(controlPointsPositions.data(), controlPointsPositions.size() * sizeof(Vector3));
 }

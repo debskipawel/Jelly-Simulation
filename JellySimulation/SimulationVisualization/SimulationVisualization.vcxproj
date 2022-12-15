@@ -210,6 +210,7 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClInclude Include="DirectX\Shaders\D11GeometryShader.h" />
     <ClInclude Include="ParticleSystem\Particle.h" />
     <ClInclude Include="ParticleSystem\ParticleSystem.h" />
+    <ClInclude Include="Resources\Meshes\BezierCube.h" />
     <ClInclude Include="Resources\Meshes\Cube.h" />
     <ClInclude Include="Resources\Meshes\CubeNormal.h" />
     <ClInclude Include="Resources\Meshes\WorldGrid.h" />
