@@ -7,6 +7,7 @@ namespace SpringSimulationGUI.ViewModels
         private bool _drawControlPoints = true;
         private bool _drawSteeringFrame = false;
         private bool _drawShadedCube = false;
+        private bool _drawBoundingCuboid = true;
 
         public bool DrawControlPoints
         {
@@ -40,10 +41,20 @@ namespace SpringSimulationGUI.ViewModels
                 UpdateVisualizationParameters();
             }
         }
+        public bool DrawBoundingCuboid
+        {
+            get { return _drawBoundingCuboid; }
+            set
+            {
+                _drawBoundingCuboid = value;
+                NotifyPropertyChanged();
+                UpdateVisualizationParameters();
+            }
+        }
 
         protected void UpdateVisualizationParameters()
         {
-            InteropMethods.UpdateVisualizationParameters(_drawControlPoints, _drawSteeringFrame, _drawShadedCube);
+            InteropMethods.UpdateVisualizationParameters(_drawControlPoints, _drawSteeringFrame, _drawShadedCube, _drawBoundingCuboid);
         }
     }
 }

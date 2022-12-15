@@ -34,6 +34,11 @@ namespace SpringSimulationGUI.ViewModels
             get => model.ElasticityOnSteeringSprings;
             set { model.ElasticityOnSteeringSprings = value; NotifyPropertyChanged(); }
         }
+        public float ElasticityOnCollitions
+        {
+            get => model.ElasticityOnCollitions;
+            set { model.ElasticityOnCollitions = value; NotifyPropertyChanged(); }
+        }
 
         public float MaxInitialImbalance
         {
@@ -49,7 +54,7 @@ namespace SpringSimulationGUI.ViewModels
 
         private void RestartSimulation()
         {
-            InteropMethods.RestartSimulation(ControlPointMass, Stickiness, ElasticityBetweenMasses, ElasticityOnSteeringSprings, MaxInitialImbalance);
+            InteropMethods.RestartSimulation(ControlPointMass, Stickiness, ElasticityBetweenMasses, ElasticityOnSteeringSprings, ElasticityOnCollitions, MaxInitialImbalance);
         }
     }
 }

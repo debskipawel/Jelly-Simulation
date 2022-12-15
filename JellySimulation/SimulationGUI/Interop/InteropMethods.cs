@@ -35,10 +35,10 @@ namespace SpringSimulationGUI.Interop
         public static extern void Scroll(float dd);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube);
+        public static extern void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float maxImbalance);
+        public static extern void RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringOnCollisions, float maxImbalance);
 
         /// <summary>
         /// Method used to invoke an Action that will catch DllNotFoundExceptions and display a warning dialog.

@@ -227,6 +227,7 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClInclude Include="Scene\SceneObject.h" />
     <ClInclude Include="Utils\Clock.h" />
     <ClInclude Include="Utils\Random.h" />
+    <ClInclude Include="Utils\sgn.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera\OrbitCamera.cpp" />

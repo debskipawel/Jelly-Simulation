@@ -67,6 +67,16 @@
                 </DockPanel>
 
                 <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
+                    <Label>Elasticity on collisions:</Label>
+                    <numeric:FloatBox 
+						DockPanel.Dock="Right"
+						Value="{Binding ElasticityOnCollitions, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						ValidationTrigger="PropertyChanged"
+						MinValue="0" MaxValue="1"
+						Width="80" />
+                </DockPanel>
+
+                <DockPanel VerticalAlignment="Center" Margin="0 2" LastChildFill="False">
                     <Label>Max initial imbalance:</Label>
                     <numeric:FloatBox 
 						DockPanel.Dock="Right"
@@ -90,8 +100,9 @@
                 <TextBlock Margin="2 2" FontWeight="Bold" Text="Visualization parameters:"></TextBlock>
                 
                 <CheckBox Margin="5 5" Content="Draw control points" IsChecked="{Binding DrawControlPoints, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                <CheckBox Margin="5 5" Content="Draw steering frame" IsChecked="{Binding DrawControlPoints, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                <CheckBox Margin="5 5" Content="Draw shaded cube" IsChecked="{Binding DrawControlPoints, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                <CheckBox Margin="5 5" Content="Draw steering frame" IsChecked="{Binding DrawSteeringFrame, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                <CheckBox Margin="5 5" Content="Draw shaded cube" IsChecked="{Binding DrawShadedCube, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                <CheckBox Margin="5 5" Content="Draw bounding cube" IsChecked="{Binding DrawBoundingCuboid, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
 
             </StackPanel>
 

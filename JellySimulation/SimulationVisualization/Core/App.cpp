@@ -12,17 +12,21 @@
 #include <Scene/SceneObject.h>
 #include <Scene/SceneIterator.h>
 #include <Scene/EntityFactory.h>
+#include <Utils/sgn.h>
 
 constexpr float CUBE_SIDE = 1.0f;
 constexpr float DISTANCE_BETWEEN_POINTS = CUBE_SIDE / 3;
 
 App::App()
-	: m_scene(),
-	  m_lastFrameTime(0.0f), m_residualSimulationTime(0.0f),
-	  m_renderer(std::make_shared<D11Renderer>()),
-	  m_simulationTimeStep(0.01f), m_controlPointMass(1.0f),
-	  m_stickiness(0.1f), m_elasticityBetweenMasses(1.0f), m_elasticityOnSteeringSprings(1.0f),
-	  m_maxInitialImbalance(0.05f)
+	: 
+	m_scene(),
+	m_lastFrameTime(0.0f), m_residualSimulationTime(0.0f),
+	m_renderer(std::make_shared<D11Renderer>()),
+	m_simulationTimeStep(0.01f), m_controlPointMass(1.0f),
+	m_stickiness(0.1f), m_elasticityBetweenMasses(1.0f), 
+	m_elasticityOnSteeringSprings(1.0f),
+	m_elasticyOnCollisions(0.8f),
+	m_maxInitialImbalance(0.05f)
 {
 	this->InitializeControlFrame();
 
@@ -43,6 +47,8 @@ void App::Update(float deltaTime)
 		m_residualSimulationTime -= m_simulationTimeStep;
 
 		UpdatePhysics();
+
+		while (ApplyCollisions()) {}
 	}
 
 	UpdateMesh();
@@ -83,7 +89,6 @@ void App::MoveSteeringCube(float dx, float dy)
 		}
 	);
 
-	// TODO: dodac kolizje
 }
 
 void App::MoveCamera(float dx, float dy)
@@ -154,7 +159,7 @@ void App::UpdatePhysics()
 	}
 }
 
-void App::UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube)
+void App::UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid)
 {
 	auto& renderCP = m_renderControlPoints.GetComponent<RenderingComponent>();
 	renderCP.ShouldRender = drawControlPoints;
@@ -164,14 +169,18 @@ void App::UpdateVisualizationParameters(bool drawControlPoints, bool drawSteerin
 
 	auto& renderSC = m_renderShadedCube.GetComponent<RenderingComponent>();
 	renderSC.ShouldRender = drawShadedCube;
+
+	auto& renderBC = m_renderBoundingCuboid.GetComponent<RenderingComponent>();
+	renderBC.ShouldRender = drawShadedCube;
 }
 
-void App::RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float maxImbalance)
+void App::RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance)
 {
 	m_controlPointMass = pointMass;
 	m_stickiness = stickiness;
 	m_elasticityBetweenMasses = massesElasticity;
 	m_elasticityOnSteeringSprings = steeringSpringsElasticity;
+	m_elasticyOnCollisions = steeringElasticyOnCollisions;
 	m_maxInitialImbalance = maxImbalance;
 
 	m_fullSimulationTime = 0.0f;
@@ -286,7 +295,10 @@ void App::InitializeControlFrame()
 
 void App::InitializeMesh()
 {
-	m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene);
+	m_renderSteeringFrame = EntityFactory::CreateCube(m_renderer->Device(), m_scene, 1.0);
+
+	m_renderBoundingCuboid = EntityFactory::CreateCube(m_renderer->Device(), m_scene, boundingCubeSideLength);
+
 	m_renderControlPoints = EntityFactory::CreateBezierCube(m_renderer->Device(), m_scene);
 }
 
@@ -315,4 +327,35 @@ void App::UpdateMesh()
 
 	auto& controlPointsRendering = m_renderControlPoints.GetComponent<RenderingComponent>();
 	controlPointsRendering.VertexBuffer->Update(controlPointsPositions.data(), controlPointsPositions.size() * sizeof(Vector3));
+}
+
+bool App::ApplyCollisions()
+{
+	bool colissionDetected = false;
+	auto applyCollitionSingleCoordinate = [&](float& position, float& velocity)
+	{
+		float newPosition = position;
+		if (position > boundingCubeSideLength / 2 || position < -boundingCubeSideLength / 2)
+		{
+			colissionDetected = true;
+
+			float outDistance = abs(position) - boundingCubeSideLength / 2;
+			position = sgn(position) * (boundingCubeSideLength / 2 - outDistance);
+			velocity = -1 * velocity * m_elasticyOnCollisions;
+
+		}
+		return newPosition;
+	};
+	for (auto& controlPoint : m_controlPoints)
+	{
+		auto position = controlPoint.transform.Position;
+
+		applyCollitionSingleCoordinate(controlPoint.transform.Position.x, controlPoint.physics.Velocity.x);
+		applyCollitionSingleCoordinate(controlPoint.transform.Position.y, controlPoint.physics.Velocity.y);
+		applyCollitionSingleCoordinate(controlPoint.transform.Position.z, controlPoint.physics.Velocity.z);
+
+		
+	}
+
+	return colissionDetected;
 }

@@ -7,7 +7,7 @@ class EntityFactory
 public:
 	EntityFactory() = delete;
 
-	static SceneObject CreateCube(const D11Device& device, Scene& scene);
+	static SceneObject CreateCube(const D11Device& device, Scene& scene, float sideLength);
 	static SceneObject CreateDiagonal(const D11Device& device, Scene& scene, float side = 1.0f);
 	static SceneObject CreateWorldGrid(const D11Device& device, Scene& scene);
 	static SceneObject CreateBezierCube(const D11Device& device, Scene& scene);

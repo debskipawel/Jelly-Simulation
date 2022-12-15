@@ -15,11 +15,16 @@
 #include <Resources/Meshes/CubeNormal.h>
 #include <Resources/Meshes/WorldGrid.h>
 
-SceneObject EntityFactory::CreateCube(const D11Device& device, Scene& scene)
+SceneObject EntityFactory::CreateCube(const D11Device& device, Scene& scene, float sideLength)
 {
     auto cube = SceneObject(scene);
 
-    auto vb = std::make_shared<D11VertexBuffer>(device, g_cubePositionVertices.size() * sizeof(Vector3), g_cubePositionLayout, g_cubePositionVertices.data());
+    auto positions = g_cubePositionVertices;
+    for (size_t i = 0; i < g_cubePositionVertices.size(); i++)
+    {
+        positions[i] = positions[i] * sideLength;
+    }
+    auto vb = std::make_shared<D11VertexBuffer>(device, positions.size() * sizeof(Vector3), g_cubePositionLayout, positions.data());
     auto ib = std::make_shared<D11IndexBuffer>(device, DXGI_FORMAT_R16_UINT, g_cubePositionIndices.size() * sizeof(unsigned short), g_cubePositionIndices.data(), D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
     auto vs = D11ShaderLoader::VSLoad(device, L"../shaders_bin/mvp_pos_vs.hlsl", g_cubePositionLayout, { 4 * sizeof(Matrix) });

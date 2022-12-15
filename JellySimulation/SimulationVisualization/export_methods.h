@@ -11,6 +11,6 @@ extern "C"
 	__declspec(dllexport) void __cdecl MoveOnRightClick(float dx, float dy);
 	__declspec(dllexport) void __cdecl Scroll(float dd);
 	
-	__declspec(dllexport) void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube);
-	__declspec(dllexport) void __cdecl RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float maxImbalance);
+	__declspec(dllexport) void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid);
+	__declspec(dllexport) void __cdecl RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance);
 }

@@ -25,9 +25,9 @@ public:
 	void Zoom(float dd);
 
 	void UpdatePhysics();
-	void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube);
+	void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid);
 
-	void RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float maxImbalance);
+	void RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance);
 
 protected:
 
@@ -37,8 +37,11 @@ protected:
 	void InitializeMesh();
 	void UpdateMesh();
 
+	bool ApplyCollisions();
+
 	float m_elasticityBetweenMasses;
 	float m_elasticityOnSteeringSprings;
+	float m_elasticyOnCollisions;
 	float m_stickiness;
 	float m_controlPointMass;
 	float m_maxInitialImbalance;
@@ -63,4 +66,9 @@ protected:
 	SceneObject m_renderControlPoints;
 	SceneObject m_renderSteeringFrame;
 	SceneObject m_renderShadedCube;
+
+	SceneObject m_renderBoundingCuboid;
+
+	const float boundingCubeSideLength = 10.0f;
+
 };

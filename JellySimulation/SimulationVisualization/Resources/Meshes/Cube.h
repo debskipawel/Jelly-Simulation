@@ -16,12 +16,12 @@ static const std::vector<Vector3> g_cubePositionVertices =
 {
     { -0.5f, -0.5f, -0.5f },
     {  0.5f, -0.5f, -0.5f },
-    {  0.5f,  0.5f, -0.5f },
     { -0.5f,  0.5f, -0.5f },
+    {  0.5f,  0.5f, -0.5f },
     { -0.5f, -0.5f,  0.5f },
     {  0.5f, -0.5f,  0.5f },
-    {  0.5f,  0.5f,  0.5f },
     { -0.5f,  0.5f,  0.5f },
+    {  0.5f,  0.5f,  0.5f },
 };
 
 static const std::vector<unsigned short> g_cubePositionIndices =

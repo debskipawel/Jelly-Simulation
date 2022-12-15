@@ -67,7 +67,7 @@ extern void __cdecl Scroll(float dd)
 	g_app->Zoom(dd);
 }
 
-void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube)
+void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid)
 {
 	if (!g_app)
 		return;
@@ -75,10 +75,10 @@ void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawStee
 	// g_app->UpdateVisualizationParameters(drawControlPoints, drawSteeringCube, drawShadedCube);
 }
 
-void __cdecl RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float maxImbalance)
+void __cdecl RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance)
 {
 	if (!g_app)
 		return;
 
-	g_app->RestartSimulation(pointMass, stickiness, massesElasticity, steeringSpringsElasticity, maxImbalance);
+	g_app->RestartSimulation(pointMass, stickiness, massesElasticity, steeringSpringsElasticity, steeringElasticyOnCollisions, maxImbalance);
 }
