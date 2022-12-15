@@ -20,7 +20,7 @@ App::App()
 	: m_scene(),
 	  m_lastFrameTime(0.0f), m_residualSimulationTime(0.0f),
 	  m_renderer(std::make_shared<D11Renderer>()),
-	  m_simulationTimeStep(0.01f), m_controlPointMass(1.0f / 64),
+	  m_simulationTimeStep(0.01f), m_controlPointMass(1.0f),
 	  m_stickiness(0.1f), m_elasticityBetweenMasses(0.5f), m_elasticityOnSteeringSprings(0.5f),
 	  m_maxInitialImbalance(0.05f)
 {
@@ -129,11 +129,11 @@ void App::UpdatePhysics()
 			forceDirection.Normalize();
 
 			auto deviation = relativePosition.Length() - spring.initialLength;
-			auto deviationDeriv = 0.0f;//forceDirection.Dot(relativeVelocity);
+			auto deviationDeriv = forceDirection.Dot(relativeVelocity);
 			
 			auto forceValue = -(m_stickiness * deviationDeriv + spring.elasticity * deviation);
 
-			physics.Forces += forceDirection * forceValue;
+			physics.Forces -= forceDirection * forceValue;
 		}
 	}
 
@@ -179,7 +179,7 @@ void App::RestartSimulation(float pointMass, float stickiness, float massesElast
 	m_fullSimulationTime = 0.0f;
 	m_residualSimulationTime = 0.0f;
 
-	this->InitializeControlPoints();
+	this->InitializeControlFrame();
 }
 
 void App::InitializeControlPoints()
@@ -256,11 +256,6 @@ void App::InitializeControlPoints()
 
 void App::InitializeControlFrame()
 {
-	if (m_controlPoints.size() != 64)
-	{
-		InitializeControlPoints();
-	}
-
 	const Vector3 cubeCenterPosition = m_controlFrameCenter;
 	const Vector3 initialPoint = -CUBE_SIDE / 2 * Vector3::One + cubeCenterPosition;
 
@@ -272,16 +267,21 @@ void App::InitializeControlFrame()
 		auto y = (float)((i / 2) % 2);
 		auto z = (float)(i / 4);
 
-		auto& attachedObject = m_controlPoints[attachedVertices[i]];
-
 		SceneObject object(m_scene);
 		auto& transform = object.AddComponent<TransformComponent>();
 		transform.Position = CUBE_SIDE * Vector3{ x, y, z } + initialPoint;
 
 		m_controlFrame.push_back(object);
+	}
+
+	InitializeControlPoints();
+
+	for (int i = 0; i < 8; i++)
+	{
+		auto& attachedObject = m_controlPoints[attachedVertices[i]];
 
 		auto& springs = attachedObject.GetComponent<SpringsComponent>();
-		springs.springs.push_back(DynamicSpring{ object, 0.0f, m_elasticityOnSteeringSprings });
+		springs.springs.push_back(DynamicSpring{ m_controlFrame[i], 0.0f, m_elasticityOnSteeringSprings});
 	}
 }
 
