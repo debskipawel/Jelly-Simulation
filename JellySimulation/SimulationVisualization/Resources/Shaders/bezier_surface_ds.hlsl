@@ -1,52 +1,149 @@
-struct DS_OUTPUT
-{
-	float4 vPosition  : SV_POSITION;
-};
+#define OUTPUT_PATCH_SIZE 16
 
-struct HS_CONTROL_POINT_OUTPUT
+cbuffer mvpBuffer : register(b0)
 {
-	float3 pos : WORLD_POS; 
-};
-
-struct HS_CONSTANT_DATA_OUTPUT
-{
-	float EdgeTessFactor[4]			: SV_TessFactor;
-	float InsideTessFactor[2]		: SV_InsideTessFactor;
-};
-
-#define NUM_CONTROL_POINTS 16
-
-float3 PointOnCurve(float3 cp[4], float t)
-{
-    float3 a = lerp(cp[0], cp[1], t);
-    float3 b = lerp(cp[1], cp[2], t);
-    float3 c = lerp(cp[2], cp[3], t);
-    float3 d = lerp(a, b, t);
-    float3 e = lerp(b, c, t);
-	
-    return lerp(d, e, t);
+    matrix model;
+    matrix view;
+    matrix invView;
+    matrix proj;
 }
 
-float3 PointOnSurface(const OutputPatch<HS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> patch, float2 uv)
+struct TangentSystem
 {
-    float3 uRow1[] = { patch[0].pos,  patch[1].pos,  patch[2].pos,  patch[3].pos };
-    float3 uRow2[] = { patch[4].pos,  patch[5].pos,  patch[6].pos,  patch[7].pos };
-    float3 uRow3[] = { patch[8].pos,  patch[9].pos,  patch[10].pos, patch[11].pos };
-    float3 uRow4[] = { patch[12].pos, patch[13].pos, patch[14].pos, patch[15].pos };
+    float3 N : NORMAL;
+    float3 T : TANGENT;
+    float3 B : BINORMAL;
+};
 
-    float3 newCP[] = { PointOnCurve(uRow1, uv.x), PointOnCurve(uRow2, uv.x), PointOnCurve(uRow3, uv.x), PointOnCurve(uRow4, uv.x) };
+struct PSInput
+{
+    float4 pos : SV_POSITION;
+    float4 viewPos : VIEWPOS;
+    float4 worldPos : WORLDPOS;
+    TangentSystem tangent;
+    float3 camPos : CAMERA;
+};
 
-    return PointOnCurve(newCP, uv.y);
+struct DSControlPoint
+{
+    float4 pos : POSITION;
+};
+
+struct HSPatchOutput
+{
+    float edges[4] : SV_TessFactor;
+    float insideFactors[2] : SV_InsideTessFactor;
+};
+
+float4 DeCasteljau3(int n, float t)
+{
+    matrix bernsteinBasis =
+    {
+        { 1.0, 0.0, 0.0, 0.0 },
+        { 0.0, 0.0, 0.0, 0.0 },
+        { 0.0, 0.0, 0.0, 0.0 },
+        { 0.0, 0.0, 0.0, 0.0 },
+    };
+
+    float u = 1.0 - t;
+
+    for (int j = 1; j <= n; j++)
+    {
+        bernsteinBasis[j][0] = bernsteinBasis[j - 1][0] * u;
+
+        for (int i = 1; i <= j; i++)
+        {
+            bernsteinBasis[j][i] = bernsteinBasis[j - 1][i] * u + bernsteinBasis[j - 1][i - 1] * t;
+        }
+    }
+
+    return float4(bernsteinBasis[n][0], bernsteinBasis[n][1], bernsteinBasis[n][2], bernsteinBasis[n][3]);
+}
+
+float4 PointOnBezier(const OutputPatch<DSControlPoint, OUTPUT_PATCH_SIZE> input, float2 uv)
+{
+    float4 bernsteinU = DeCasteljau3(3, uv.x);
+    float4 bernsteinV = DeCasteljau3(3, uv.y);
+    
+    float4 result = 0.0;
+    
+    for (int i = 0; i < 4; i++)
+    {
+        float4 partialResult = 0.0;
+        
+        for (int j = 0; j < 4; j++)
+        {
+            partialResult += input[4 * i + j].pos * bernsteinU[j];
+        }
+
+        result += partialResult * bernsteinV[i];
+    }
+
+    return result;
+}
+
+float3 NormalOnBezier(const OutputPatch<DSControlPoint, OUTPUT_PATCH_SIZE> input, float2 uv, inout TangentSystem tang)
+{
+    tang = (TangentSystem) 0;
+    
+    float4 bernsteinU = DeCasteljau3(3, uv.x);
+    float4 bernsteinV = DeCasteljau3(3, uv.y);
+    
+    float4 bernsteinDiffU = DeCasteljau3(2, uv.x);
+    float4 bernsteinDiffV = DeCasteljau3(2, uv.y);
+    
+    float4 uCurveCP[4];
+    float4 vCurveCP[4];
+    
+    for (int i = 0; i < 4; i++)
+    {
+        uCurveCP[i] = 0.0f;
+        vCurveCP[i] = 0.0f;
+        
+        for (int j = 0; j < 4; j++)
+        {
+            uCurveCP[i] += input[4 * j + i].pos * bernsteinV[j];
+            vCurveCP[i] += input[4 * i + j].pos * bernsteinU[j];
+        }
+    }
+
+    float4 uDerivative = 0.0f, vDerivative = 0.0f;
+    
+    for (int k = 0; k < 3; k++)
+    {
+        uDerivative += 3.0f * (uCurveCP[k + 1] - uCurveCP[k]) * bernsteinDiffU[k];
+        vDerivative += 3.0f * (vCurveCP[k + 1] - vCurveCP[k]) * bernsteinDiffV[k];
+    }
+    
+    tang.T = uDerivative;
+    tang.B = vDerivative;
+    tang.N = cross(normalize(uDerivative).xyz, normalize(vDerivative).xyz);
+
+    return tang.N;
 }
 
 [domain("quad")]
-DS_OUTPUT main(
-	HS_CONSTANT_DATA_OUTPUT input,
+PSInput main(
+	HSPatchOutput input,
 	float2 uv : SV_DomainLocation,
-	const OutputPatch<HS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> patch)
+	const OutputPatch<DSControlPoint, OUTPUT_PATCH_SIZE> patch)
 {
-	DS_OUTPUT Output;
-    Output.vPosition = float4(PointOnSurface(patch, uv), 1.0);
-
-	return Output;
+    PSInput o;
+    TangentSystem sys;
+    
+    float4 viewPos = PointOnBezier(patch, uv);
+    float3 normal = NormalOnBezier(patch, uv, sys);
+    
+    sys.N = normalize(mul(invView, float4(sys.N, 0.0)).xyz);
+    sys.T = normalize(mul(invView, float4(sys.T, 0.0)).xyz);
+    sys.B = normalize(mul(invView, float4(sys.B, 0.0)).xyz);
+    
+    o.pos = mul(proj, viewPos);
+    o.viewPos = viewPos;
+    o.tangent = sys;
+    o.worldPos = mul(invView, viewPos);
+    
+    o.camPos = mul(invView, float4(0.0, 0.0, 0.0, 1.0));
+    
+	return o;
 }

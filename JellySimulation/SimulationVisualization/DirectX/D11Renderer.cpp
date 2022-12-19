@@ -161,28 +161,14 @@ void D11Renderer::Render(Scene& scene)
         m_device->Context()->PSSetShader(ps->Shader(), nullptr, 0);
         m_device->Context()->PSSetConstantBuffers(0, psConstantBuffers.size(), psConstantBuffers.data());
 
-        auto textures = ps->RawTextures();
-        m_device->Context()->PSSetShaderResources(0, textures.size(), textures.data());
-
-        if (entity.HasComponent<DepthStateComponent>())
+        if (!ps->Textures().empty())
         {
-            auto& depthState = entity.GetComponent<DepthStateComponent>();
-
-            m_device->Context()->OMSetDepthStencilState(depthState.DepthState.Get(), 0);
+            auto textures = ps->RawTextures();
+            m_device->Context()->PSSetShaderResources(0, textures.size(), textures.data());
         }
         else
         {
-            m_device->Context()->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
-        }
-        if (entity.HasComponent<BlendStateComponent>())
-        {
-            auto& blendState = entity.GetComponent<BlendStateComponent>();
-
-            m_device->Context()->OMSetBlendState(blendState.BlendState.Get(), 0, 0xffffffff);
-        }
-        else
-        {
-            m_device->Context()->OMSetBlendState(m_blendState.Get(), 0, 0xffffffff);
+            m_device->Context()->PSSetShaderResources(0, 0, nullptr);
         }
 
         if (entity.HasComponent<TessellationComponent>())
@@ -191,9 +177,14 @@ void D11Renderer::Render(Scene& scene)
 
             auto& hs = tessellation.HullShader;
             auto& ds = tessellation.DomainShader;
+            auto hsConstantBuffers = hs->RawConstantBuffers();
+            auto dsConstantBuffers = ds->RawConstantBuffers();
 
             m_device->Context()->HSSetShader(hs->Shader(), nullptr, 0);
+            m_device->Context()->HSSetConstantBuffers(0, hsConstantBuffers.size(), hsConstantBuffers.data());
+
             m_device->Context()->DSSetShader(ds->Shader(), nullptr, 0);
+            m_device->Context()->DSSetConstantBuffers(0, dsConstantBuffers.size(), dsConstantBuffers.data());
         }
         else
         {
@@ -224,32 +215,6 @@ void D11Renderer::SetUpViewport()
 
 void D11Renderer::SetUpStates()
 {
-    D3D11_BLEND_DESC omDesc;
-    ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
-
-    omDesc.RenderTarget[0].BlendEnable = true;
-    omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_DEST_ALPHA;
-    omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-    omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-    omDesc.AlphaToCoverageEnable = false;
-
-    m_device->Raw()->CreateBlendState(&omDesc, m_blendState.GetAddressOf());
-    m_device->Context()->OMSetBlendState(m_blendState.Get(), 0, 0xffffffff);
-
-    D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-
-    dsDesc.DepthEnable = false;
-    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-    dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-    m_device->Raw()->CreateDepthStencilState(&dsDesc, m_depthStencilState.GetAddressOf());
-
-
     D3D11_RASTERIZER_DESC rsDesc = {};
 
     rsDesc.FillMode = D3D11_FILL_SOLID; 

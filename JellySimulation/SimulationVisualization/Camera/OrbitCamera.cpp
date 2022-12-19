@@ -67,10 +67,15 @@ Vector3 OrbitCamera::GetRight()
 	return dir;
 }
 
-void OrbitCamera::ProcessMouseMove(float dx, float dy)
+void OrbitCamera::RotateCamera(float dx, float dy)
 {
 	m_angleX = XMScalarModAngle(m_angleX - dy);
 	m_angleZ = XMScalarModAngle(m_angleZ - dx);
+}
+
+void OrbitCamera::MoveCamera(Vector3 delta)
+{
+	m_target += delta;
 }
 
 void OrbitCamera::Zoom(float dd)

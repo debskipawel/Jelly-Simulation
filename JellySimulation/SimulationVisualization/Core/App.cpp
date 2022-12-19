@@ -32,7 +32,7 @@ App::App()
 
 	m_lastFrameTime = Clock::Now();
 
-	m_grid = EntityFactory::CreateWorldGrid(m_renderer->Device(), m_scene);
+	//m_grid = EntityFactory::CreateWorldGrid(m_renderer->Device(), m_scene);
 
 	InitializeMesh();
 }
@@ -91,9 +91,19 @@ void App::MoveSteeringCube(float dx, float dy)
 
 }
 
-void App::MoveCamera(float dx, float dy)
+void App::MoveCamera(float dx, float dy, bool rotate)
 {
-	m_scene.Camera()->ProcessMouseMove(dx, dy);
+	auto camera = m_scene.Camera();
+
+	if (rotate)
+	{
+		camera->RotateCamera(dx, dy);
+	}
+	else
+	{
+		auto delta = -dx * camera->GetRight() + dy * camera->GetUp();
+		camera->MoveCamera(delta);
+	}
 }
 
 void App::Zoom(float dd)
@@ -101,17 +111,23 @@ void App::Zoom(float dd)
 	m_scene.Camera()->Zoom(dd);
 }
 
+void App::ToggleGravity(bool gravityOn)
+{
+	m_outerForces = gravityOn ? Vector3{ 0.0f, 0.0f, -9.81f } : Vector3::Zero;
+}
+
 void App::UpdatePhysics()
 {
 	auto stickiness = m_stickiness;
+	auto fieldForces = m_outerForces;
 	
 	// applying forces from springs
-	std::for_each(std::execution::par, m_controlPoints.begin(), m_controlPoints.end(), [stickiness](const SpringDependentEntity& controlPoint)
+	std::for_each(std::execution::par, m_controlPoints.begin(), m_controlPoints.end(), [stickiness, fieldForces](const SpringDependentEntity& controlPoint)
 		{
 			auto& springs = controlPoint.springs;
 			auto& transform = controlPoint.transform;
 			auto& physics = controlPoint.physics;
-			physics.Forces = Vector3::Zero;
+			physics.Forces = fieldForces * physics.Mass;
 
 			auto position = transform.Position;
 
@@ -159,7 +175,7 @@ void App::UpdatePhysics()
 	}
 }
 
-void App::UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid)
+void App::UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid, bool drawDuck)
 {
 	auto& renderCP = m_renderControlPoints.GetComponent<RenderingComponent>();
 	renderCP.ShouldRender = drawControlPoints;
@@ -172,6 +188,9 @@ void App::UpdateVisualizationParameters(bool drawControlPoints, bool drawSteerin
 
 	auto& renderBC = m_renderBoundingCuboid.GetComponent<RenderingComponent>();
 	renderBC.ShouldRender = drawBoundingCuboid;
+
+	auto& renderDU = m_renderDuck.GetComponent<RenderingComponent>();
+	renderDU.ShouldRender = drawDuck;
 }
 
 void App::RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance)
@@ -303,13 +322,7 @@ void App::InitializeMesh()
 
 	m_renderControlPoints = EntityFactory::CreateBezierCube(m_renderer->Device(), m_scene);
 
-	auto& renderCP = m_renderControlPoints.GetComponent<RenderingComponent>();
-
 	m_renderShadedCube = EntityFactory::CreateShadedBezierCube(m_renderer->Device(), m_scene);
-	auto& renderSC = m_renderShadedCube.GetComponent<RenderingComponent>();
-
-	renderSC.VertexBuffer.reset();
-	renderSC.VertexBuffer = renderCP.VertexBuffer;
 
 	m_renderDuck = EntityFactory::CreateDuck(m_renderer->Device(), m_scene, L"..\\Resources\\MeshesFiles\\duck.txt", m_controlPoints);
 }
@@ -339,6 +352,9 @@ void App::UpdateMesh()
 
 	auto& controlPointsRendering = m_renderControlPoints.GetComponent<RenderingComponent>();
 	controlPointsRendering.VertexBuffer->Update(controlPointsPositions.data(), controlPointsPositions.size() * sizeof(Vector3));
+
+	auto& shadedMeshRendering = m_renderShadedCube.GetComponent<RenderingComponent>();
+	shadedMeshRendering.VertexBuffer->Update(controlPointsPositions.data(), controlPointsPositions.size() * sizeof(Vector3));
 }
 
 bool App::ApplyCollisions()
@@ -347,6 +363,7 @@ bool App::ApplyCollisions()
 	auto applyCollitionSingleCoordinate = [&](float& position, float& velocity)
 	{
 		float newPosition = position;
+		
 		if (position > boundingCubeSideLength / 2 || position < -boundingCubeSideLength / 2)
 		{
 			colissionDetected = true;
@@ -354,10 +371,11 @@ bool App::ApplyCollisions()
 			float outDistance = abs(position) - boundingCubeSideLength / 2;
 			position = sgn(position) * (boundingCubeSideLength / 2 - outDistance);
 			velocity = -1 * velocity * m_elasticyOnCollisions;
-
 		}
+
 		return newPosition;
 	};
+
 	for (auto& controlPoint : m_controlPoints)
 	{
 		auto position = controlPoint.transform.Position;

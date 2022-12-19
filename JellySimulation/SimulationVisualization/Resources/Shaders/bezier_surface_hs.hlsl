@@ -1,49 +1,43 @@
-struct VS_CONTROL_POINT_OUTPUT
+#define INPUT_PATCH_SIZE 16
+#define OUTPUT_PATCH_SIZE 16
+
+struct HSInput
 {
-	float3 pos : WORLD_POS;
+    float4 sv_pos : SV_POSITION;
+    float4 pos : POSITION;
 };
 
-struct HS_CONTROL_POINT_OUTPUT
+struct DSControlPoint
 {
-	float3 pos : WORLD_POS; 
+    float4 pos : POSITION;
 };
 
-struct HS_CONSTANT_DATA_OUTPUT
+struct HSPatchOutput
 {
 	float EdgeTessFactor[4]			: SV_TessFactor;
 	float InsideTessFactor[2]		: SV_InsideTessFactor;
 };
 
-#define NUM_CONTROL_POINTS 16
 
-HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip,
-	uint PatchID : SV_PrimitiveID)
+HSPatchOutput CalcHSPatchConstants(InputPatch<HSInput, INPUT_PATCH_SIZE> ip, uint PatchID : SV_PrimitiveID)
 {
-	HS_CONSTANT_DATA_OUTPUT Output;
+    HSPatchOutput o;
 
-	Output.EdgeTessFactor[0] = 
-		Output.EdgeTessFactor[1] = 
-		Output.EdgeTessFactor[2] = 
-		Output.EdgeTessFactor[3] =
-		Output.InsideTessFactor[0] =
-	    Output.InsideTessFactor[1] = 15;
+    o.EdgeTessFactor[0] = o.EdgeTessFactor[1] = o.EdgeTessFactor[2] = o.EdgeTessFactor[3] = 16;
+    o.InsideTessFactor[0] = o.InsideTessFactor[1] = 16;
 
-	return Output;
+	return o;
 }
 
 [domain("quad")]
-[partitioning("fractional_odd")]
+[partitioning("integer")]
 [outputtopology("triangle_cw")]
-[outputcontrolpoints(16)]
+[outputcontrolpoints(OUTPUT_PATCH_SIZE)]
 [patchconstantfunc("CalcHSPatchConstants")]
-HS_CONTROL_POINT_OUTPUT main( 
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip, 
-	uint i : SV_OutputControlPointID,
-	uint PatchID : SV_PrimitiveID )
+DSControlPoint main(InputPatch<HSInput, INPUT_PATCH_SIZE> ip, uint i : SV_OutputControlPointID, uint PatchID : SV_PrimitiveID)
 {
-	HS_CONTROL_POINT_OUTPUT Output;
-	Output.pos = ip[i].pos;
+    DSControlPoint o;
+	o.pos = ip[i].pos;
 
-	return Output;
+	return o;
 }

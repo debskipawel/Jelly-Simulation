@@ -108,7 +108,7 @@ namespace SpringSimulationGUI.ViewModels
 
         private void MoveOnMiddleClick(float dx, float dy)
         {
-            InteropMethods.MoveOnMiddleClick(dx, dy);
+            InteropMethods.MoveOnMiddleClick(dx, dy, Keyboard.IsKeyDown(Key.LeftShift));
         }
 
         private void MoveOnRightClick(float dx, float dy)

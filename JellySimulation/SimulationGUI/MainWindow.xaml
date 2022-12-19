@@ -103,6 +103,7 @@
                 <CheckBox Margin="5 5" Content="Draw steering frame" IsChecked="{Binding DrawSteeringFrame, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                 <CheckBox Margin="5 5" Content="Draw shaded cube" IsChecked="{Binding DrawShadedCube, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                 <CheckBox Margin="5 5" Content="Draw bounding cube" IsChecked="{Binding DrawBoundingCuboid, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                <CheckBox Margin="5 5" Content="Draw 3D model" IsChecked="{Binding DrawDuck, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
 
             </StackPanel>
 

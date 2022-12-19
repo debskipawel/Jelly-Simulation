@@ -15,6 +15,7 @@ public:
 	virtual Vector3 GetUp() = 0;
 	virtual Vector3 GetRight() = 0;
 
-	virtual void ProcessMouseMove(float dx, float dy) = 0;
+	virtual void RotateCamera(float dx, float dy) = 0;
+	virtual void MoveCamera(Vector3 delta) = 0;
 	virtual void Zoom(float dd) = 0;
 };

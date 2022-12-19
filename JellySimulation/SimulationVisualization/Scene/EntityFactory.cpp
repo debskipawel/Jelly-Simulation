@@ -174,17 +174,18 @@ SceneObject EntityFactory::CreateShadedBezierCube(const D11Device& device, Scene
     auto vb = std::make_shared<D11VertexBuffer>(device, vertices.size() * sizeof(Vector3), g_bezierCubePositionLayout, vertices.data());
     auto ib = std::make_shared<D11IndexBuffer>(device, DXGI_FORMAT_R16_UINT, indices.size() * sizeof(unsigned short), indices.data(), D3D_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST);
 
-    auto vs = D11ShaderLoader::VSLoad(device, L"../shaders_bin/mvp_pos_vs.hlsl", g_bezierCubePositionLayout, { 4 * sizeof(Matrix) });
-    auto ps = D11ShaderLoader::PSLoad(device, L"../shaders_bin/solid_color_ps.hlsl", { sizeof(Vector4) });
+    auto vs = D11ShaderLoader::VSLoad(device, L"../shaders_bin/tessellation_vs.hlsl", g_bezierCubePositionLayout, { 4 * sizeof(Matrix) });
+    auto ps = D11ShaderLoader::PSLoad(device, L"../shaders_bin/tessellated_surface_ps.hlsl", { sizeof(Vector4) });
 
     auto hs = D11ShaderLoader::HSLoad(device, L"../shaders_bin/bezier_surface_hs.hlsl");
-    auto ds = D11ShaderLoader::DSLoad(device, L"../shaders_bin/bezier_surface_ds.hlsl");
+    auto ds = D11ShaderLoader::DSLoad(device, L"../shaders_bin/bezier_surface_ds.hlsl", { 4 * sizeof(Matrix) });
 
     cube.AddComponent<RenderingComponent>(
         vb, ib, vs, ps,
         [](const D11Renderer& renderer, SceneObject object)
         {
             auto& rendering = object.GetComponent<RenderingComponent>();
+            auto& tessellation = object.GetComponent<TessellationComponent>();
 
             auto view = object.GetCamera()->GetViewMatrix();
             Matrix buf[] = {
@@ -193,15 +194,15 @@ SceneObject EntityFactory::CreateShadedBezierCube(const D11Device& device, Scene
                 view.Invert(),
                 renderer.GetProjectionMatrix()
             };
-            Vector4 color = { 0.0f, 0.1f, 0.5f, 0.5f };
+            Vector4 color = { 0.1f, 0.1f, 0.5f, 1.0f };
 
             rendering.VertexShader->UpdateConstantBuffer(0, buf, 4 * sizeof(Matrix));
             rendering.PixelShader->UpdateConstantBuffer(0, &color, sizeof(Vector4));
+            tessellation.DomainShader->UpdateConstantBuffer(0, buf, 4 * sizeof(Matrix));
         }
     );
     cube.AddComponent<TessellationComponent>(hs, ds);
     cube.AddComponent<TransformComponent>();
-    cube.AddComponent<DepthStateComponent>(nullptr);
 
     return cube;
 }
@@ -220,12 +221,12 @@ SceneObject EntityFactory::CreateDuck(const D11Device& device, Scene& scene, con
     auto texture = device.CreateShaderResourceViewFromFile(L"..\\Resources\\MeshesFiles\\ducktex.jpg");
     ps->AddTexture(texture);
 
-    sceneObject.AddComponent<BlendStateComponent>(device);
-    sceneObject.AddComponent<DepthStateComponent>(device);
     sceneObject.AddComponent<RenderingComponent>(
         vb, ib, vs, ps,
         [&](const D11Renderer& renderer, SceneObject object)
         {
+            auto& rendering = object.GetComponent<RenderingComponent>();
+
             auto view = object.GetCamera()->GetViewMatrix();
             Matrix buf[] = {
                 Matrix::CreateScale(0.005) * Matrix::CreateRotationX(XM_PIDIV2) * Matrix::CreateTranslation(0,0,-0.3),

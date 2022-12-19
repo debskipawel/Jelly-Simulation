@@ -5,9 +5,10 @@ namespace SpringSimulationGUI.ViewModels
     public class VisualizationViewModel : ObservableObject
     {
         private bool _drawControlPoints = true;
-        private bool _drawSteeringFrame = false;
-        private bool _drawShadedCube = false;
+        private bool _drawSteeringFrame = true;
+        private bool _drawShadedCube = true;
         private bool _drawBoundingCuboid = true;
+        private bool _drawDuck = true;
 
         public bool DrawControlPoints
         {
@@ -52,9 +53,20 @@ namespace SpringSimulationGUI.ViewModels
             }
         }
 
+        public bool DrawDuck
+        {
+            get { return _drawDuck; }
+            set
+            {
+                _drawDuck = value;
+                NotifyPropertyChanged();
+                UpdateVisualizationParameters();
+            }
+        }
+
         protected void UpdateVisualizationParameters()
         {
-            InteropMethods.UpdateVisualizationParameters(_drawControlPoints, _drawSteeringFrame, _drawShadedCube, _drawBoundingCuboid);
+            InteropMethods.UpdateVisualizationParameters(_drawControlPoints, _drawSteeringFrame, _drawShadedCube, _drawBoundingCuboid, _drawDuck);
         }
     }
 }

@@ -21,11 +21,12 @@ public:
 	void Render(void* resource, bool isNewResource);
 
 	void MoveSteeringCube(float dx, float dy);
-	void MoveCamera(float dx, float dy);
+	void MoveCamera(float dx, float dy, bool rotate);
 	void Zoom(float dd);
 
+	void ToggleGravity(bool gravityOn);
 	void UpdatePhysics();
-	void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid);
+	void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid, bool drawDuck);
 
 	void RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance);
 
@@ -51,6 +52,8 @@ protected:
 	float m_lastFrameTime;
 	float m_fullSimulationTime;
 	float m_residualSimulationTime;
+
+	Vector3 m_outerForces = Vector3::Zero;
 
 	Vector3 m_controlFrameCenter = Vector3::Zero;
 
