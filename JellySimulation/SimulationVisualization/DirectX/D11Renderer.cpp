@@ -8,6 +8,7 @@
 
 #include <Components/Rendering/RenderingComponent.h>
 #include <Components/Rendering/DepthStateComponent.h>
+#include <Components/Rendering/BlendStateComponent.h>
 
 D11Renderer::D11Renderer()
 {
@@ -159,6 +160,9 @@ void D11Renderer::Render(Scene& scene)
         m_device->Context()->PSSetShader(ps->Shader(), nullptr, 0);
         m_device->Context()->PSSetConstantBuffers(0, psConstantBuffers.size(), psConstantBuffers.data());
 
+        auto textures = ps->RawTextures();
+        m_device->Context()->PSSetShaderResources(0, textures.size(), textures.data());
+
         if (entity.HasComponent<DepthStateComponent>())
         {
             auto& depthState = entity.GetComponent<DepthStateComponent>();
@@ -168,6 +172,16 @@ void D11Renderer::Render(Scene& scene)
         else
         {
             m_device->Context()->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
+        }
+        if (entity.HasComponent<BlendStateComponent>())
+        {
+            auto& blendState = entity.GetComponent<BlendStateComponent>();
+
+            m_device->Context()->OMSetBlendState(blendState.BlendState.Get(), 0, 0xffffffff);
+        }
+        else
+        {
+            m_device->Context()->OMSetBlendState(m_blendState.Get(), 0, 0xffffffff);
         }
 
         m_device->Context()->DrawIndexed(ib->Count(), 0, 0);
@@ -217,4 +231,21 @@ void D11Renderer::SetUpStates()
     dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
     m_device->Raw()->CreateDepthStencilState(&dsDesc, m_depthStencilState.GetAddressOf());
+
+
+    D3D11_RASTERIZER_DESC rsDesc = {};
+
+    rsDesc.FillMode = D3D11_FILL_SOLID; 
+    rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE; 
+    rsDesc.FrontCounterClockwise = false; 
+    rsDesc.DepthBias = 0;
+    rsDesc.DepthBiasClamp = 0.0f;
+    rsDesc.SlopeScaledDepthBias = 0.0f;
+    rsDesc.DepthClipEnable = true;
+    rsDesc.ScissorEnable = false;
+    rsDesc.MultisampleEnable = false;
+    rsDesc.AntialiasedLineEnable = false;
+
+    m_device->Raw()->CreateRasterizerState(&rsDesc, &m_rasterizerState);
+    m_device->Context()->RSSetState(m_rasterizerState.Get());
 }

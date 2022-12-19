@@ -300,6 +300,8 @@ void App::InitializeMesh()
 	m_renderBoundingCuboid = EntityFactory::CreateCube(m_renderer->Device(), m_scene, boundingCubeSideLength);
 
 	m_renderControlPoints = EntityFactory::CreateBezierCube(m_renderer->Device(), m_scene);
+
+	m_renderDuck = EntityFactory::CreateDuck(m_renderer->Device(), m_scene, L"..\\Resources\\MeshesFiles\\duck.txt", m_controlPoints);
 }
 
 void App::UpdateMesh()

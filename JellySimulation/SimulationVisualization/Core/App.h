@@ -64,6 +64,7 @@ protected:
 	std::vector<SceneObject> m_controlFrame;
 
 	SceneObject m_renderControlPoints;
+	SceneObject m_renderDuck;
 	SceneObject m_renderSteeringFrame;
 	SceneObject m_renderShadedCube;
 

@@ -15,3 +15,16 @@ std::vector<ID3D11Buffer*> D11Shader::RawConstantBuffers()
 
     return result;
 }
+
+std::vector<ID3D11ShaderResourceView*> D11Shader::RawTextures()
+{
+    std::vector<ID3D11ShaderResourceView*> result(m_textures.size());
+
+    std::transform(
+        m_textures.begin(), m_textures.end(),
+        result.begin(),
+        [](ComPtr<ID3D11ShaderResourceView> b) { return b.Get(); }
+    );
+
+    return result;
+}

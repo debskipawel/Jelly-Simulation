@@ -154,7 +154,10 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(Outdir)shaders_bin\" mkdir $(Outdir)shaders_bin\ 
-move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
+move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" 
+if not exist "$(Outdir)Resources\" mkdir $(Outdir)Resources\ 
+if not exist "$(Outdir)Resources\MeshesFiles\" mkdir $(Outdir)Resources\MeshesFiles\
+copy "$(ProjectDir)Resources\MeshesFiles\*.*" "$(Outdir)Resources\MeshesFiles\" </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -180,7 +183,10 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(Outdir)shaders_bin\" mkdir $(Outdir)shaders_bin\ 
-move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
+move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" 
+if not exist "$(Outdir)Resources\" mkdir $(Outdir)Resources\ 
+if not exist "$(Outdir)Resources\MeshesFiles\" mkdir $(Outdir)Resources\MeshesFiles\
+copy "$(ProjectDir)Resources\MeshesFiles\*.*" "$(Outdir)Resources\MeshesFiles\" </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -191,6 +197,7 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClInclude Include="Components\Particles\ParticleEmitterComponent.h" />
     <ClInclude Include="Components\PhysicsComponent.h" />
     <ClInclude Include="Components\Physics\DynamicSpring.h" />
+    <ClInclude Include="Components\Rendering\BlendStateComponent.h" />
     <ClInclude Include="Components\Rendering\DepthStateComponent.h" />
     <ClInclude Include="Components\Rendering\RenderingComponent.h" />
     <ClInclude Include="Components\Rendering\TessellationComponent.h" />
@@ -202,6 +209,7 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClInclude Include="DirectX\Buffers\D11IndexBuffer.h" />
     <ClInclude Include="DirectX\Buffers\D11VertexBuffer.h" />
     <ClInclude Include="DirectX\D11ShaderLoader.h" />
+    <ClInclude Include="DirectX\Loaders\CreateWICTextureFromFile.h" />
     <ClInclude Include="DirectX\Shaders\D11DomainShader.h" />
     <ClInclude Include="DirectX\Shaders\D11HullShader.h" />
     <ClInclude Include="DirectX\Shaders\D11PixelShader.h" />
@@ -213,6 +221,7 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClInclude Include="Resources\Meshes\BezierCube.h" />
     <ClInclude Include="Resources\Meshes\Cube.h" />
     <ClInclude Include="Resources\Meshes\CubeNormal.h" />
+    <ClInclude Include="Resources\Meshes\Duck.h" />
     <ClInclude Include="Resources\Meshes\WorldGrid.h" />
     <ClInclude Include="Resources\Structs\SpringDependentEntity.h" />
     <ClInclude Include="Scene\EntityFactory.h" />
@@ -241,6 +250,7 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     <ClCompile Include="DirectX\D11Renderer.cpp" />
     <ClCompile Include="DirectX\D11ShaderLoader.cpp" />
     <ClCompile Include="DirectX\D11Structures.cpp" />
+    <ClCompile Include="DirectX\Loaders\CreateWICTextureFromFile.cpp" />
     <ClCompile Include="DirectX\Shaders\D11Shader.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="export_methods.cpp" />
@@ -264,6 +274,22 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resources\Shaders\duck_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\duck_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="Resources\Shaders\lighting_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -320,6 +346,9 @@ move "$(OutDir)*.cso" "$(Outdir)shaders_bin\" </Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\duck_structs.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

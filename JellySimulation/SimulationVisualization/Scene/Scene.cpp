@@ -12,7 +12,7 @@
 #include <DirectX/D11Renderer.h>
 
 Scene::Scene()
-    : m_registry(), m_activeCamera(std::make_shared<OrbitCamera>(Vector3{ 0.0f, 0.0f, 1.0f }, 0.0f, 15.0f, 5.0f))
+    : m_registry(), m_activeCamera(std::make_shared<OrbitCamera>(Vector3{ 0.0f, 0.0f, 0.0f }, 0.0f, 15.0f, 5.0f))
 {
 }
 
