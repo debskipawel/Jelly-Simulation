@@ -8,6 +8,7 @@
 
 #include <Components/Rendering/RenderingComponent.h>
 #include <Components/Rendering/DepthStateComponent.h>
+#include <Components/Rendering/TessellationComponent.h>
 
 D11Renderer::D11Renderer()
 {
@@ -168,6 +169,22 @@ void D11Renderer::Render(Scene& scene)
         else
         {
             m_device->Context()->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
+        }
+
+        if (entity.HasComponent<TessellationComponent>())
+        {
+            auto& tessellation = entity.GetComponent<TessellationComponent>();
+
+            auto& hs = tessellation.HullShader;
+            auto& ds = tessellation.DomainShader;
+
+            m_device->Context()->HSSetShader(hs->Shader(), nullptr, 0);
+            m_device->Context()->DSSetShader(ds->Shader(), nullptr, 0);
+        }
+        else
+        {
+            m_device->Context()->HSSetShader(nullptr, nullptr, 0);
+            m_device->Context()->DSSetShader(nullptr, nullptr, 0);
         }
 
         m_device->Context()->DrawIndexed(ib->Count(), 0, 0);

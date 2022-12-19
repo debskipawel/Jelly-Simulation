@@ -72,7 +72,7 @@ void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawStee
 	if (!g_app)
 		return;
 	// TODO: uncomment
-	// g_app->UpdateVisualizationParameters(drawControlPoints, drawSteeringCube, drawShadedCube);
+	g_app->UpdateVisualizationParameters(drawControlPoints, drawSteeringCube, drawShadedCube, drawBoundingCuboid);
 }
 
 void __cdecl RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance)

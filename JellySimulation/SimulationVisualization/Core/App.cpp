@@ -171,7 +171,7 @@ void App::UpdateVisualizationParameters(bool drawControlPoints, bool drawSteerin
 	renderSC.ShouldRender = drawShadedCube;
 
 	auto& renderBC = m_renderBoundingCuboid.GetComponent<RenderingComponent>();
-	renderBC.ShouldRender = drawShadedCube;
+	renderBC.ShouldRender = drawBoundingCuboid;
 }
 
 void App::RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance)
@@ -234,7 +234,9 @@ void App::InitializeControlPoints()
 			int y2 = (j / 4) % 4;
 			int z2 = j / 16;
 
-			if (abs(x2 - x1) <= 1 && abs(y2 - y1) <= 1 && abs(z2 - z1) <= 1 && i != j)
+			int dx = abs(x2 - x1), dy = abs(y2 - y1), dz = abs(z2 - z1);
+
+			if (dx <= 1 && dy <= 1 && dz <= 1 && dx + dy + dz <= 2 && i != j)
 			{
 				auto& point2 = m_controlPoints[j];
 				auto& transform2 = point2.transform;
@@ -300,6 +302,13 @@ void App::InitializeMesh()
 	m_renderBoundingCuboid = EntityFactory::CreateCube(m_renderer->Device(), m_scene, boundingCubeSideLength);
 
 	m_renderControlPoints = EntityFactory::CreateBezierCube(m_renderer->Device(), m_scene);
+	auto& renderCP = m_renderControlPoints.GetComponent<RenderingComponent>();
+
+	m_renderShadedCube = EntityFactory::CreateShadedBezierCube(m_renderer->Device(), m_scene);
+	auto& renderSC = m_renderShadedCube.GetComponent<RenderingComponent>();
+
+	renderSC.VertexBuffer.reset();
+	renderSC.VertexBuffer = renderCP.VertexBuffer;
 }
 
 void App::UpdateMesh()
@@ -353,8 +362,6 @@ bool App::ApplyCollisions()
 		applyCollitionSingleCoordinate(controlPoint.transform.Position.x, controlPoint.physics.Velocity.x);
 		applyCollitionSingleCoordinate(controlPoint.transform.Position.y, controlPoint.physics.Velocity.y);
 		applyCollitionSingleCoordinate(controlPoint.transform.Position.z, controlPoint.physics.Velocity.z);
-
-		
 	}
 
 	return colissionDetected;
