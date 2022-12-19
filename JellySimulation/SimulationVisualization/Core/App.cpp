@@ -302,6 +302,7 @@ void App::InitializeMesh()
 	m_renderBoundingCuboid = EntityFactory::CreateCube(m_renderer->Device(), m_scene, boundingCubeSideLength);
 
 	m_renderControlPoints = EntityFactory::CreateBezierCube(m_renderer->Device(), m_scene);
+
 	auto& renderCP = m_renderControlPoints.GetComponent<RenderingComponent>();
 
 	m_renderShadedCube = EntityFactory::CreateShadedBezierCube(m_renderer->Device(), m_scene);
@@ -309,6 +310,8 @@ void App::InitializeMesh()
 
 	renderSC.VertexBuffer.reset();
 	renderSC.VertexBuffer = renderCP.VertexBuffer;
+
+	m_renderDuck = EntityFactory::CreateDuck(m_renderer->Device(), m_scene, L"..\\Resources\\MeshesFiles\\duck.txt", m_controlPoints);
 }
 
 void App::UpdateMesh()

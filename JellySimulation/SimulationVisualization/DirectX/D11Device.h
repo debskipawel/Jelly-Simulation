@@ -17,6 +17,7 @@ public:
 	ComPtr<ID3D11RenderTargetView> CreateRenderTargetView(const ComPtr<ID3D11Texture2D>& texture);
 	ComPtr<ID3D11DepthStencilView> CreateDepthStencilBuffer(UINT width, UINT height);
 	ComPtr<ID3D11Texture2D> CreateTexture(const D3D11_TEXTURE2D_DESC& desc) const;
+	ComPtr<ID3D11ShaderResourceView> CreateShaderResourceViewFromFile(const std::wstring& texPath) const;
 
 private:
 

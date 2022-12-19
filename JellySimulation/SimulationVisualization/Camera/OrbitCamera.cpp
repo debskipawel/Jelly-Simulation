@@ -2,7 +2,7 @@
 #include "OrbitCamera.h"
 
 OrbitCamera::OrbitCamera(Vector3 target, float minDistance, float maxDistance, float distance)
-	: m_angleX(0.0f), m_angleZ(0.0f), m_target(target.x, target.y, target.z), m_distance(distance)
+	: m_angleX(-0.1f), m_angleZ(0.0f), m_target(target.x, target.y, target.z), m_distance(distance)
 {
 	if (maxDistance < minDistance)
 	{

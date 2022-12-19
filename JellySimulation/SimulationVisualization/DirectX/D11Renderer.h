@@ -44,6 +44,8 @@ private:
 	ComPtr<ID3D11BlendState> m_blendState;
 	ComPtr<ID3D11DepthStencilState> m_depthStencilState;
 
+	ComPtr<ID3D11RasterizerState> m_rasterizerState;
+
 	UINT m_width;
 	UINT m_height;
 };

@@ -2,6 +2,7 @@
 
 #include "D11Device.h"
 #include "D11Structures.h"
+#include "./Loaders/CreateWICTextureFromFile.h"
 
 D11Device::D11Device()
 {
@@ -84,4 +85,17 @@ ComPtr<ID3D11Texture2D> D11Device::CreateTexture(const D3D11_TEXTURE2D_DESC& des
 	}
 
 	return result;
+}
+
+ComPtr<ID3D11ShaderResourceView> D11Device::CreateShaderResourceViewFromFile(const std::wstring& texPath) const
+{
+	ID3D11ShaderResourceView* rv = nullptr;;
+	HRESULT hr = 0;
+	const std::wstring ext{ L".dds" };
+		hr = CreateWICTextureFromFile(m_device.Get(), m_context.Get(), texPath.c_str(), nullptr, &rv);
+	ComPtr<ID3D11ShaderResourceView> resourceView(rv);
+	if (FAILED(hr))
+		//Make sure CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED); is called before first use of this function!
+		throw std::exception("");
+	return resourceView;
 }
