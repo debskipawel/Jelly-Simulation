@@ -8,6 +8,7 @@ namespace SpringSimulationGUI.ViewModels
     public class SimulationViewModel : ObservableObject
     {
         protected JellySimulationModel model;
+        protected bool gravityOn;
 
         public ICommand RestartSimulationCommand { get; set; }
 
@@ -34,6 +35,7 @@ namespace SpringSimulationGUI.ViewModels
             get => model.ElasticityOnSteeringSprings;
             set { model.ElasticityOnSteeringSprings = value; NotifyPropertyChanged(); }
         }
+        
         public float ElasticityOnCollitions
         {
             get => model.ElasticityOnCollitions;
@@ -44,6 +46,12 @@ namespace SpringSimulationGUI.ViewModels
         {
             get => model.MaxInitialImbalance;
             set { model.MaxInitialImbalance = value; NotifyPropertyChanged(); }
+        }
+
+        public bool GravityOn
+        {
+            get => gravityOn;
+            set { gravityOn = value; NotifyPropertyChanged(); InteropMethods.ToggleGravity(gravityOn); }
         }
 
         public SimulationViewModel()

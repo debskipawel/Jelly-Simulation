@@ -17,7 +17,8 @@ public:
 	virtual Vector3 GetUp() override;
 	virtual Vector3 GetRight() override;
 
-	virtual void ProcessMouseMove(float dx, float dy) override;
+	virtual void RotateCamera(float dx, float dy) override;
+	virtual void MoveCamera(Vector3 delta) override;
 	virtual void Zoom(float dd) override;
 
 protected:

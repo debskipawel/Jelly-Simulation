@@ -47,16 +47,20 @@ extern void __cdecl MoveOnLeftClick(float dx, float dy)
 	g_app->MoveSteeringCube(dx, -dy);
 }
 
-extern void __cdecl MoveOnMiddleClick(float dx, float dy)
+extern void __cdecl MoveOnMiddleClick(float dx, float dy, bool shiftClicked)
 {
 	if (!g_app)
 		return;
 
-	g_app->MoveCamera(dx, dy);
+	g_app->MoveCamera(dx, dy, !shiftClicked);
 }
 
 extern void __cdecl MoveOnRightClick(float dx, float dy)
 {
+	if (!g_app)
+		return;
+
+	g_app->RotateSteeringCube(dx, dy);
 }
 
 extern void __cdecl Scroll(float dd)
@@ -67,12 +71,20 @@ extern void __cdecl Scroll(float dd)
 	g_app->Zoom(dd);
 }
 
-void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid)
+void __cdecl ToggleGravity(bool gravityOn)
 {
 	if (!g_app)
 		return;
-	// TODO: uncomment
-	// g_app->UpdateVisualizationParameters(drawControlPoints, drawSteeringCube, drawShadedCube);
+
+	g_app->ToggleGravity(gravityOn);
+}
+
+void __cdecl UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid, bool drawDuck)
+{
+	if (!g_app)
+		return;
+
+	g_app->UpdateVisualizationParameters(drawControlPoints, drawSteeringCube, drawShadedCube, drawBoundingCuboid, drawDuck);
 }
 
 void __cdecl RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringElasticyOnCollisions, float maxImbalance)

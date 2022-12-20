@@ -7,6 +7,12 @@ using namespace Microsoft::WRL;
 struct DepthStateComponent
 {
 public:
+	DepthStateComponent(ComPtr<ID3D11DepthStencilState> depthState)
+		: DepthState(depthState)
+	{
+
+	}
+
 	DepthStateComponent(const D11Device& device)
 	{
 		D3D11_DEPTH_STENCIL_DESC dsDesc = {};

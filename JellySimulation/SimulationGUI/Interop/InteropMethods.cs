@@ -26,7 +26,7 @@ namespace SpringSimulationGUI.Interop
         public static extern void MoveOnLeftClick(float dx, float dy);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MoveOnMiddleClick(float dx, float dy);
+        public static extern void MoveOnMiddleClick(float dx, float dy, bool shiftClicked);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void MoveOnRightClick(float dx, float dy);
@@ -35,10 +35,13 @@ namespace SpringSimulationGUI.Interop
         public static extern void Scroll(float dd);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid);
+        public static extern void UpdateVisualizationParameters(bool drawControlPoints, bool drawSteeringCube, bool drawShadedCube, bool drawBoundingCuboid, bool drawDuck);
 
         [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void RestartSimulation(float pointMass, float stickiness, float massesElasticity, float steeringSpringsElasticity, float steeringOnCollisions, float maxImbalance);
+
+        [DllImport("../SimulationVisualization.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ToggleGravity(bool gravityOn);
 
         /// <summary>
         /// Method used to invoke an Action that will catch DllNotFoundExceptions and display a warning dialog.
