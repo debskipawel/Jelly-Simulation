@@ -246,6 +246,8 @@ void App::InitializeControlPoints()
 
 	m_controlPoints.clear();
 
+	auto rotation = Matrix::CreateRotationZ(m_zAngle) * Matrix::CreateRotationX(m_xAngle);
+
 	for (int i = 0; i < 64; i++)
 	{
 		int x = i % 4;
@@ -255,7 +257,11 @@ void App::InitializeControlPoints()
 		SceneObject point(m_scene);
 
 		auto& transform = point.AddComponent<TransformComponent>();
-		transform.Position = initialPoint + Vector3{ x * DISTANCE_BETWEEN_POINTS, y * DISTANCE_BETWEEN_POINTS, z * DISTANCE_BETWEEN_POINTS };
+		auto localPosition = Vector3::Transform(
+			Vector3{ x * DISTANCE_BETWEEN_POINTS, y * DISTANCE_BETWEEN_POINTS, z * DISTANCE_BETWEEN_POINTS } + initialPoint - m_controlFrameCenter, 
+			rotation
+		);
+		transform.Position = m_controlFrameCenter + localPosition;
 
 		auto& physics = point.AddComponent<PhysicsComponent>(m_controlPointMass);
 		auto& springs = point.AddComponent<SpringsComponent>();

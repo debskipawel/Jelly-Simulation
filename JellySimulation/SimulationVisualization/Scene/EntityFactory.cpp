@@ -154,7 +154,7 @@ SceneObject EntityFactory::CreateBezierCube(const D11Device& device, Scene& scen
                 view.Invert(),
                 renderer.GetProjectionMatrix()
             };
-            Vector4 color = { 0.0f, 0.5f, 0.1f, 0.5f };
+            Vector4 color = { 0.9f, 0.2f, 0.8f, 1.0f };
 
             rendering.VertexShader->UpdateConstantBuffer(0, buf, 4 * sizeof(Matrix));
             rendering.PixelShader->UpdateConstantBuffer(0, &color, sizeof(Vector4));
@@ -194,7 +194,7 @@ SceneObject EntityFactory::CreateShadedBezierCube(const D11Device& device, Scene
                 view.Invert(),
                 renderer.GetProjectionMatrix()
             };
-            Vector4 color = { 0.1f, 0.1f, 0.5f, 1.0f };
+            Vector4 color = { 0.1f, 0.8f, 0.2f, 1.0f };
 
             rendering.VertexShader->UpdateConstantBuffer(0, buf, 4 * sizeof(Matrix));
             rendering.PixelShader->UpdateConstantBuffer(0, &color, sizeof(Vector4));
