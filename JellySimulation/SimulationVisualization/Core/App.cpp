@@ -73,6 +73,26 @@ void App::Render(void* resource, bool isNewResource)
 	m_renderer->EndFrame();
 }
 
+void App::RotateSteeringCube(float dx, float dy)
+{
+	auto camera = m_scene.Camera();
+	auto center = m_controlFrameCenter;
+
+	m_zAngle -= dx;
+	m_xAngle += dy;
+
+	auto rotation = Matrix::CreateRotationZ(m_zAngle) * Matrix::CreateRotationX(m_xAngle);
+
+	for (int i = 0; i < m_controlFrame.size(); i++)
+	{
+		auto& object = m_controlFrame[i];
+		auto unrotatedPosition = m_controlFramePositions[i];
+
+		auto& transform = object.GetComponent<TransformComponent>();
+		transform.Position = Vector3::Transform(unrotatedPosition - m_controlFrameCenter, rotation) + m_controlFrameCenter;
+	}
+}
+
 void App::MoveSteeringCube(float dx, float dy)
 {
 	auto camera = m_scene.Camera();
@@ -89,6 +109,12 @@ void App::MoveSteeringCube(float dx, float dy)
 		}
 	);
 
+	std::for_each(std::execution::par, m_controlFramePositions.begin(), m_controlFramePositions.end(),
+		[move](Vector3& position)
+		{
+			position += move;
+		}
+	);
 }
 
 void App::MoveCamera(float dx, float dy, bool rotate)
@@ -301,6 +327,7 @@ void App::InitializeControlFrame()
 		transform.Position = CUBE_SIDE * Vector3{ x, y, z } + initialPoint;
 
 		m_controlFrame.push_back(object);
+		m_controlFramePositions.push_back(transform.Position);
 	}
 
 	InitializeControlPoints();

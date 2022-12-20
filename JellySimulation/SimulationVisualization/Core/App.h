@@ -20,6 +20,7 @@ public:
 	void Update(float deltaTime);
 	void Render(void* resource, bool isNewResource);
 
+	void RotateSteeringCube(float dx, float dy);
 	void MoveSteeringCube(float dx, float dy);
 	void MoveCamera(float dx, float dy, bool rotate);
 	void Zoom(float dd);
@@ -55,8 +56,6 @@ protected:
 
 	Vector3 m_outerForces = Vector3::Zero;
 
-	Vector3 m_controlFrameCenter = Vector3::Zero;
-
 	Scene m_scene;
 	std::shared_ptr<D11Renderer> m_renderer;
 
@@ -64,7 +63,11 @@ protected:
 	SceneObject m_mesh;
 
 	std::vector<SpringDependentEntity> m_controlPoints;
+	
 	std::vector<SceneObject> m_controlFrame;
+	std::vector<Vector3> m_controlFramePositions;
+	float m_xAngle = 0.0f, m_zAngle = 0.0f;
+	Vector3 m_controlFrameCenter = Vector3::Zero;
 
 	SceneObject m_renderControlPoints;
 	SceneObject m_renderDuck;

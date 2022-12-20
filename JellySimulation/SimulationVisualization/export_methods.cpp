@@ -57,6 +57,10 @@ extern void __cdecl MoveOnMiddleClick(float dx, float dy, bool shiftClicked)
 
 extern void __cdecl MoveOnRightClick(float dx, float dy)
 {
+	if (!g_app)
+		return;
+
+	g_app->RotateSteeringCube(dx, dy);
 }
 
 extern void __cdecl Scroll(float dd)
