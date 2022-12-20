@@ -18,12 +18,12 @@ constexpr float CUBE_SIDE = 1.0f;
 constexpr float DISTANCE_BETWEEN_POINTS = CUBE_SIDE / 3;
 
 App::App()
-	: 
+	:
 	m_scene(),
 	m_lastFrameTime(0.0f), m_residualSimulationTime(0.0f),
 	m_renderer(std::make_shared<D11Renderer>()),
 	m_simulationTimeStep(0.01f), m_controlPointMass(1.0f),
-	m_stickiness(0.1f), m_elasticityBetweenMasses(1.0f), 
+	m_stickiness(0.1f), m_elasticityBetweenMasses(1.0f),
 	m_elasticityOnSteeringSprings(1.0f),
 	m_elasticyOnCollisions(0.8f),
 	m_maxInitialImbalance(0.05f)
@@ -146,7 +146,7 @@ void App::UpdatePhysics()
 {
 	auto stickiness = m_stickiness;
 	auto fieldForces = m_outerForces;
-	
+
 	// applying forces from springs
 	std::for_each(std::execution::par, m_controlPoints.begin(), m_controlPoints.end(), [stickiness, fieldForces](const SpringDependentEntity& controlPoint)
 		{
@@ -195,9 +195,9 @@ void App::UpdatePhysics()
 		auto mass = physics.Mass;
 
 		auto acceleration = force / mass;
-
-		transform.Position += velocity * m_simulationTimeStep;
 		physics.Velocity += acceleration * m_simulationTimeStep;
+		transform.Position += physics.Velocity * m_simulationTimeStep;
+
 	}
 }
 
@@ -253,7 +253,7 @@ void App::InitializeControlPoints()
 		int z = i / 16;
 
 		SceneObject point(m_scene);
-		
+
 		auto& transform = point.AddComponent<TransformComponent>();
 		transform.Position = initialPoint + Vector3{ x * DISTANCE_BETWEEN_POINTS, y * DISTANCE_BETWEEN_POINTS, z * DISTANCE_BETWEEN_POINTS };
 
@@ -337,7 +337,7 @@ void App::InitializeControlFrame()
 		auto& attachedObject = m_controlPoints[attachedVertices[i]];
 
 		auto& springs = attachedObject.springs;
-		springs.springs.push_back(DynamicSpring{ m_controlFrame[i], 0.0f, m_elasticityOnSteeringSprings});
+		springs.springs.push_back(DynamicSpring{ m_controlFrame[i], 0.0f, m_elasticityOnSteeringSprings });
 	}
 }
 
@@ -390,7 +390,7 @@ bool App::ApplyCollisions()
 	auto applyCollitionSingleCoordinate = [&](float& position, float& velocity)
 	{
 		float newPosition = position;
-		
+
 		if (position > boundingCubeSideLength / 2 || position < -boundingCubeSideLength / 2)
 		{
 			colissionDetected = true;
