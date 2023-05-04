@@ -1,6 +1,6 @@
 # JellySimulation
 
-A soft body physics simulation, made by approximating the jelly cube by a Bezier cube made of 64 points, connected with springs.
+A soft body physics simulation, made by approximating the jelly cube with a Bezier cube made of 64 points, connected with springs.
 It was implemented using WPF & C# for GUI, and C++ with DirectX 11 for the simulation loop and graphics.
 
 The graphics engine is ECS-based, and was my first try of implementing this pattern. 
